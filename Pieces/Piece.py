@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-
+from GUI.GUILayout import IGUILayout
 
 
 if TYPE_CHECKING:
@@ -18,6 +18,9 @@ class IPiece:
 
     def isBlack(self):
         return not self.isWhite()
+
+    def getImage(self, layout: IGUILayout):
+        raise NotImplementedError
 
 
 class PieceSCPS(IPiece):

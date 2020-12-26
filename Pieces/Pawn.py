@@ -1,3 +1,4 @@
+from GUI.GUILayout import IGUILayout
 from Pieces.Piece import IPiece, PieceSCPS
 
 
@@ -10,3 +11,8 @@ class PawnSCPS(PieceSCPS, IPawn):
         PieceSCPS.__init__(self, isWhite=isWhite)
         IPawn.__init__(self, isWhite)
 
+    def getImage(self, layout: IGUILayout):
+        if self.isWhite():
+            return layout.getWhitePawnImage()
+        else:
+            return layout.getBlackPawnImage()

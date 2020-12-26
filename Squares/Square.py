@@ -29,6 +29,13 @@ class ISquare:
     def liesOnBoard(self):
         return self.representation.onBoard()
 
+    def isLightSquare(self) -> bool:
+        return not self.isDarkSquare()
+
+    def isDarkSquare(self) -> bool:
+        return (self.getFile() + self.getRank()) % 2 == 0
+
+
 
 class SquareSCPS(ISquare):
     """
@@ -37,7 +44,7 @@ class SquareSCPS(ISquare):
     Has a link to the board and to the piece that stands on top of this square.
     """
     def __init__(self, board: BoardSquareCenteredWithPieceSets,
-                 representation: ISquareRepresentation = Square0x88Representation):
+                 representation: ISquareRepresentation):
         """
         Used when creating an empty board only!
         """
@@ -51,6 +58,9 @@ class SquareSCPS(ISquare):
 
     def getBoard(self):
         return self.board
+
+    def getPiece(self):
+        return self.piece
 
 
 

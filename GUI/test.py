@@ -9,7 +9,7 @@ import time
 
 button_names = ('close', 'cookbook', 'cpu', 'github', 'pysimplegui', 'run', 'storage', 'timer')
 
-CHESS_PATH = './PieceIcons'  # path to the chess pieces
+CHESS_PATH = os.path.join(os.curdir, "PieceIcons", "Default")  # path to the chess pieces
 
 BLANK = 0  # piece names
 PAWNB = 1
@@ -35,18 +35,18 @@ initial_board = [[ROOKB, KNIGHTB, BISHOPB, KINGB, QUEENB, BISHOPB, KNIGHTB, ROOK
                  [ROOKW, KNIGHTW, BISHOPW, KINGW, QUEENW, BISHOPW, KNIGHTW, ROOKW]]
 
 blank = os.path.join(CHESS_PATH, 'blank.png')
-bishopB = os.path.join(CHESS_PATH, 'nbishopb.png')
-bishopW = os.path.join(CHESS_PATH, 'nbishopw.png')
-pawnB = os.path.join(CHESS_PATH, 'npawnb.png')
-pawnW = os.path.join(CHESS_PATH, 'npawnw.png')
-knightB = os.path.join(CHESS_PATH, 'nknightb.png')
-knightW = os.path.join(CHESS_PATH, 'nknightw.png')
-rookB = os.path.join(CHESS_PATH, 'nrookb.png')
-rookW = os.path.join(CHESS_PATH, 'nrookw.png')
-queenB = os.path.join(CHESS_PATH, 'nqueenB.png')
-queenW = os.path.join(CHESS_PATH, 'nqueenW.png')
-kingB = os.path.join(CHESS_PATH, 'nkingb.png')
-kingW = os.path.join(CHESS_PATH, 'nkingw.png')
+bishopB = os.path.join(CHESS_PATH, 'bishopb.png')
+bishopW = os.path.join(CHESS_PATH, 'bishopw.png')
+pawnB = os.path.join(CHESS_PATH, 'pawnb.png')
+pawnW = os.path.join(CHESS_PATH, 'pawnw.png')
+knightB = os.path.join(CHESS_PATH, 'knightb.png')
+knightW = os.path.join(CHESS_PATH, 'knightw.png')
+rookB = os.path.join(CHESS_PATH, 'rookb.png')
+rookW = os.path.join(CHESS_PATH, 'rookw.png')
+queenB = os.path.join(CHESS_PATH, 'queenb.png')
+queenW = os.path.join(CHESS_PATH, 'queenw.png')
+kingB = os.path.join(CHESS_PATH, 'kingb.png')
+kingW = os.path.join(CHESS_PATH, 'kingw.png')
 
 images = {BISHOPB: bishopB, BISHOPW: bishopW, PAWNB: pawnB, PAWNW: pawnW, KNIGHTB: knightB, KNIGHTW: knightW,
           ROOKB: rookB, ROOKW: rookW, KINGB: kingB, KINGW: kingW, QUEENB: queenB, QUEENW: queenW, BLANK: blank}
@@ -86,7 +86,7 @@ def PlayGame():
     # create initial board setup
     board = copy.deepcopy(initial_board)
     # the main board display layout
-    board_layout = [[sg.T('     ')] + [sg.T('{}'.format(a), pad=((23, 27), 0), font='Any 13') for a in 'abcdefgh']]
+    board_layout = [[sg.T('     ')] + [sg.T('{}'.format(a), pad=((23, 27), 0), font='Any 13') for a in 'ABCDEFGH']]
     # loop though board and create buttons with images
     for i in range(8):
         row = [sg.T(str(8 - i) + '   ', font='Any 13')]
@@ -130,7 +130,6 @@ def PlayGame():
 
     window = sg.Window('Chess', default_button_element_size=(12, 1), auto_size_buttons=False, icon='kingb.ico').Layout(
         layout)
-
     # ---===--- Loop taking in user input --- #
     i = 0
     moves = None

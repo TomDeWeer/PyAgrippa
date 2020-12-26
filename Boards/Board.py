@@ -1,5 +1,5 @@
 from collections import Set
-from typing import List
+from typing import List, Optional
 
 from Pieces.Bishop import IBishop, BishopSCPS
 from Pieces.King import IKing, KingSCPS
@@ -118,7 +118,26 @@ class IBoard:
     def getMoves(self):
         raise NotImplementedError
 
-    def getPieceOn(self, square: ISquare):
+    # The following methods must be provided by every board class BUT are not guaranteed to be fast! EXTERNAL USERS ARE
+    # THUS ADVISED NOT TO USE THESE METHODS WHEN EFFICIENCY IS KEY
+    #
+    # Depending on the board representation, some methods are fast and some are not. What is guaranteed is that the
+    # other methods, such as getMoves, use only the efficient methods and are thus efficient as well.
+
+    def getSquares(self) -> List[List[ISquare]]:
+        """
+        Every sublist contains squares on the same rank, ordered by file from a to h. The sublists correspond to a rank
+        and are ordered from 1 to 8.
+        """
+        raise NotImplementedError
+
+    def getPieces(self) -> List[IPiece]:
+        raise NotImplementedError
+
+    def getPieceOn(self, square: ISquare) -> Optional[IPiece]:
+        raise NotImplementedError
+
+    def getSquareOf(self, piece: IPiece) -> ISquare:
         raise NotImplementedError
 
 
@@ -139,13 +158,13 @@ class BoardSquareCenteredWithPieceSets(IBoard):
     - a link to the board
     - a link to the piece they're on
 
-    It's thus fully connected (except for piece to board). This is done to prevent looping over pieces in order to check if a square is occupied.
-    Other implementations might use looping or use fixed indexing to check this.
+    It's thus fully connected (except for piece to board). This is done to prevent looping over pieces in order to check
+    if a square is occupied. Other implementations might use looping or use fixed indexing to check this.
     """
 
-    def __init__(self, squareRepresentor: ISquareRepresentor):
+    def __init__(self, squareRepresentor: ISquareRepresentor = Square0x88Representor):
         IBoard.__init__(self, squareRepresentor=squareRepresentor)
-        self.squares: List[List[SquareSCPS]] = [[None,]*8]*8
+        self.squares: List[List[SquareSCPS]] = [[None,]*8 for i in range(8)]
         self.initializeSquares()
         self.whitePieces = set()
         self.blackPieces = set()
@@ -153,7 +172,8 @@ class BoardSquareCenteredWithPieceSets(IBoard):
     def initializeSquares(self):
         for file in range(8):
             for rank in range(8):
-                square = SquareSCPS(board=self)
+                square = SquareSCPS(board=self,
+                                    representation=self.squareRepresentor.generateViaRankAndFile(rank=rank, file=file))
                 self.addSquare(square, file, rank)
 
     def addSquare(self, square: SquareSCPS, file: int, rank: int):
@@ -165,6 +185,9 @@ class BoardSquareCenteredWithPieceSets(IBoard):
         Use this only for initialization.
         """
         return self.squares[rank][file]
+
+    def getSquares(self) -> List[List[SquareSCPS]]:
+        return self.squares
 
     def initializePiece(self, piece: PieceSCPS, square: SquareSCPS):
         # connection between piece and board
@@ -207,3 +230,6 @@ class BoardSquareCenteredWithPieceSets(IBoard):
 
     def getMoves(self):
         pass
+
+    def getPieceOn(self, square: SquareSCPS) -> Optional[PieceSCPS]:
+        return square.getPiece()
