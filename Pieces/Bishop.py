@@ -1,19 +1,10 @@
-from GUI.GUILayout import IGUILayout
-from Pieces.Piece import PieceSCPS
-from Pieces.SlidingPiece import ISlidingPiece, SlidingPieceSCPS
+from typing import Generator
+
+from Pieces.SlidingPiece import ISlidingPiece
+from Squares.Square import ISquare
 
 
 class IBishop(ISlidingPiece):
-    pass
+    def getDestinationSquaresPerRay(self, start: ISquare) -> Generator[Generator[ISquare, None, None], None, None]:
+        return start.getBishopDestinationSquares()
 
-
-class BishopSCPS(SlidingPieceSCPS, IBishop):
-    def __init__(self, isWhite: bool):
-        SlidingPieceSCPS.__init__(self, isWhite=isWhite)
-        IBishop.__init__(self, isWhite)
-
-    def getImage(self, layout: IGUILayout):
-        if self.isWhite():
-            return layout.getWhiteBishopImage()
-        else:
-            return layout.getBlackBishopImage()

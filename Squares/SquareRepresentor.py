@@ -11,7 +11,7 @@ class ISquareRepresentor:
         raise NotImplementedError
 
 
-class Square0x88Representor(ISquareRepresentor):
+class Square0X88Representor(ISquareRepresentor):
     """
     An integer represents the position of a square using a 'ghost board'.
 

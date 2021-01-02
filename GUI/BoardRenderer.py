@@ -1,12 +1,10 @@
-from Boards.Board import IBoard, BoardSquareCenteredWithPieceSets
-from GUI.GUILayout import IGUILayout, DefaultGUILayout
-import PySimpleGUI as sg
-import os
-import chess
-import chess.pgn
 import copy
 import time
 
+import PySimpleGUI as sg
+
+from Boards.Board import IBoard, BoardSCPS
+from GUI.GUILayout import IGUILayout, DefaultGUILayout
 from Squares.Square import ISquare
 
 
@@ -17,7 +15,7 @@ class BoardRenderer:
     """
 
     def __init__(self, layout: IGUILayout = DefaultGUILayout(),
-                 initialBoard: IBoard = BoardSquareCenteredWithPieceSets()):
+                 initialBoard: IBoard = BoardSCPS.initialSetup()):
         self.layout = layout
         self.board = initialBoard
         self.window = None

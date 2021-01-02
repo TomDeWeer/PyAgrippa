@@ -1,11 +1,12 @@
 # copy paste from https://github.com/PySimpleGUI/PySimpleGUI/blob/master/Chess/Demo_Chess_Board.py
 
-import PySimpleGUI as sg
+import copy
 import os
+import time
+
+import PySimpleGUI as sg
 import chess
 import chess.pgn
-import copy
-import time
 
 button_names = ('close', 'cookbook', 'cpu', 'github', 'pysimplegui', 'run', 'storage', 'timer')
 

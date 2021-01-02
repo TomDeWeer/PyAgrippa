@@ -1,15 +1,14 @@
-from collections import Set
-from typing import List, Optional
+from typing import List, Optional, Any, Tuple
 
-from Pieces.Bishop import IBishop, BishopSCPS
-from Pieces.King import IKing, KingSCPS
-from Pieces.Knight import IKnight, KnightSCPS
-from Pieces.Pawn import IPawn, PawnSCPS
-from Pieces.Piece import IPiece, PieceSCPS
-from Pieces.Queen import IQueen, QueenSCPS
-from Pieces.Rook import IRook, RookSCPS
-from Squares.Square import ISquare, SquareSCPS
-from Squares.SquareRepresentor import ISquareRepresentor, Square0x88Representor
+from Pieces.Bishop import IBishop
+from Pieces.King import IKing
+from Pieces.Knight import IKnight
+from Pieces.Pawn import IPawn
+from Pieces.Piece import IPiece
+from Pieces.Queen import IQueen
+from Pieces.Rook import IRook
+from Squares.Square import ISquare
+from Squares.SquareRepresentor import ISquareRepresentor
 
 
 class IBoard:
@@ -19,19 +18,21 @@ class IBoard:
     later.
     """
 
-    def __init__(self, squareRepresentor: ISquareRepresentor):
+    def __init__(self,
+                 squareRepresentor: ISquareRepresentor,
+                 ):
         self.squareRepresentor = squareRepresentor
 
-    def initializePiece(self, piece: IPiece, square: ISquare):
-        """
-        Used during initialization of the board (and only then!).
-        """
+    def isWhiteToMove(self):
         raise NotImplementedError
 
-    def makeMove(self):
+    def switchSideToMove(self):
         raise NotImplementedError
 
-    def unmakeMove(self):
+    def setWhiteToMove(self):
+        raise NotImplementedError
+
+    def setBlackToMove(self):
         raise NotImplementedError
 
     def containsPiece(self, piece: IPiece):
@@ -61,68 +62,85 @@ class IBoard:
     def getNewPawn(cls, isWhite: bool) -> IPawn:
         raise NotImplementedError
 
-    def getSquare(self, file, rank) -> ISquare:
+    def setInitialSetup(self):
+        # pawns
+        for file in range(8):
+            self.putPiece(piece=self.getNewPawn(isWhite=True),
+                          square=self.getSquareAt(file=file, rank=1))
+            self.putPiece(piece=self.getNewPawn(isWhite=False),
+                          square=self.getSquareAt(file=file, rank=6))
+        # rooks
+        self.putPiece(piece=self.getNewRook(isWhite=True),
+                      square=self.getSquareAt(file=0, rank=0))
+        self.putPiece(piece=self.getNewRook(isWhite=True),
+                      square=self.getSquareAt(file=7, rank=0))
+        self.putPiece(piece=self.getNewRook(isWhite=False),
+                      square=self.getSquareAt(file=0, rank=7))
+        self.putPiece(piece=self.getNewRook(isWhite=False),
+                      square=self.getSquareAt(file=7, rank=7))
+        # knights
+        self.putPiece(piece=self.getNewKnight(isWhite=True),
+                      square=self.getSquareAt(file=1, rank=0))
+        self.putPiece(piece=self.getNewKnight(isWhite=True),
+                      square=self.getSquareAt(file=6, rank=0))
+        self.putPiece(piece=self.getNewKnight(isWhite=False),
+                      square=self.getSquareAt(file=1, rank=7))
+        self.putPiece(piece=self.getNewKnight(isWhite=False),
+                      square=self.getSquareAt(file=6, rank=7))
+        # bishops
+        self.putPiece(piece=self.getNewBishop(isWhite=True),
+                      square=self.getSquareAt(file=2, rank=0))
+        self.putPiece(piece=self.getNewBishop(isWhite=True),
+                      square=self.getSquareAt(file=5, rank=0))
+        self.putPiece(piece=self.getNewBishop(isWhite=False),
+                      square=self.getSquareAt(file=2, rank=7))
+        self.putPiece(piece=self.getNewBishop(isWhite=False),
+                      square=self.getSquareAt(file=5, rank=7))
+        # queens
+        self.putPiece(piece=self.getNewQueen(isWhite=True),
+                      square=self.getSquareAt(file=3, rank=0))
+        self.putPiece(piece=self.getNewQueen(isWhite=False),
+                      square=self.getSquareAt(file=3, rank=7))
+        # kings
+        self.putPiece(piece=self.getNewKing(isWhite=True),
+                      square=self.getSquareAt(file=4, rank=0))
+        self.putPiece(piece=self.getNewKing(isWhite=False),
+                      square=self.getSquareAt(file=4, rank=7))
+        # booleans
+        self.setWhiteToMove()
+        self.setEnPassantSquare(None)
+        self.setAllCastlingRights((True, True, True, True))
+        return self
+
+    def getLivingWhitePieces(self) -> List[IPiece]:
+        raise NotImplementedError
+
+    def getLivingBlackPieces(self) -> List[IPiece]:
+        raise NotImplementedError
+
+    def getActivePieces(self):
+        if self.isWhiteToMove():
+            return self.getLivingWhitePieces()
+        else:
+            return self.getLivingBlackPieces()
+
+    def getAllPieces(self):
+        return self.getLivingBlackPieces() + self.getLivingWhitePieces()
+
+    def checkValidity(self):
+        for piece in self.getAllPieces():
+            if not self.getPieceOn(piece.getSquare()) == piece:
+                return False
+        return True
+
+    def getSquareAt(self, file, rank) -> ISquare:
         """
         Use this only for initialization.
         """
         raise NotImplementedError
 
-    @classmethod
-    def initialSetup(cls, squareRepresentor: ISquareRepresentor = Square0x88Representor()):
-        board = cls(squareRepresentor=squareRepresentor)
-        # pawns
-        for file in range(8):
-            board.initializePiece(piece=cls.getNewPawn(isWhite=True),
-                                  square=board.getSquare(file=file, rank=1))
-            board.initializePiece(piece=cls.getNewPawn(isWhite=False),
-                                  square=board.getSquare(file=file, rank=6))
-        # rooks
-        board.initializePiece(piece=cls.getNewRook(isWhite=True),
-                              square=board.getSquare(file=0, rank=0))
-        board.initializePiece(piece=cls.getNewRook(isWhite=True),
-                              square=board.getSquare(file=7, rank=0))
-        board.initializePiece(piece=cls.getNewRook(isWhite=False),
-                              square=board.getSquare(file=0, rank=7))
-        board.initializePiece(piece=cls.getNewRook(isWhite=False),
-                              square=board.getSquare(file=7, rank=7))
-        # knights
-        board.initializePiece(piece=cls.getNewKnight(isWhite=True),
-                              square=board.getSquare(file=1, rank=0))
-        board.initializePiece(piece=cls.getNewKnight(isWhite=True),
-                              square=board.getSquare(file=6, rank=0))
-        board.initializePiece(piece=cls.getNewKnight(isWhite=False),
-                              square=board.getSquare(file=1, rank=7))
-        board.initializePiece(piece=cls.getNewKnight(isWhite=False),
-                              square=board.getSquare(file=6, rank=7))
-        # bishops
-        board.initializePiece(piece=cls.getNewBishop(isWhite=True),
-                              square=board.getSquare(file=2, rank=0))
-        board.initializePiece(piece=cls.getNewBishop(isWhite=True),
-                              square=board.getSquare(file=5, rank=0))
-        board.initializePiece(piece=cls.getNewBishop(isWhite=False),
-                              square=board.getSquare(file=2, rank=7))
-        board.initializePiece(piece=cls.getNewBishop(isWhite=False),
-                              square=board.getSquare(file=5, rank=7))
-        # queens
-        board.initializePiece(piece=cls.getNewQueen(isWhite=True),
-                              square=board.getSquare(file=3, rank=0))
-        board.initializePiece(piece=cls.getNewQueen(isWhite=False),
-                              square=board.getSquare(file=3, rank=7))
-        # kings
-        board.initializePiece(piece=cls.getNewKing(isWhite=True),
-                              square=board.getSquare(file=4, rank=0))
-        board.initializePiece(piece=cls.getNewKing(isWhite=False),
-                              square=board.getSquare(file=4, rank=7))
-        return board
-
-    def getMoves(self):
+    def getIdentifierOfSquare(self, square: ISquare):
         raise NotImplementedError
-
-    # The following methods must be provided by every board class BUT are not guaranteed to be fast! EXTERNAL USERS ARE
-    # THUS ADVISED NOT TO USE THESE METHODS WHEN EFFICIENCY IS KEY
-    #
-    # Depending on the board representation, some methods are fast and some are not. What is guaranteed is that the
-    # other methods, such as getMoves, use only the efficient methods and are thus efficient as well.
 
     def getSquares(self) -> List[List[ISquare]]:
         """
@@ -131,105 +149,216 @@ class IBoard:
         """
         raise NotImplementedError
 
-    def getPieces(self) -> List[IPiece]:
+    def getPieceOn(self, square: ISquare) -> Optional[IPiece]:
         raise NotImplementedError
 
-    def getPieceOn(self, square: ISquare) -> Optional[IPiece]:
+    def getPieceViaIdentifier(self, pieceIdentifier) -> IPiece:
         raise NotImplementedError
 
     def getSquareOf(self, piece: IPiece) -> ISquare:
         raise NotImplementedError
 
+    def getSquareViaIdentifier(self, identifier) -> ISquare:
+        raise NotImplementedError
 
-class BoardSquareCenteredWithPieceSets(IBoard):
-    """
-    Keeps track of squares with corresponding pieces on it (square centric) but also two piece sets (hybrid).
-    
-    In order to keep track of this representation without writing 'SquareCenteredWithPieceSets' everytime, it is 
-    abbreviated as SCPS.
-    
-    Object linkage:
-    the board has
-    - a link to black and to white pieces (the ones that are still on the board)
-    - a link to its squares
-    the pieces have
-    - a link to the square they're on (None if they're off the board)
-    the squares have
-    - a link to the board
-    - a link to the piece they're on
+    # en passant square utilities
+    def getEnPassantSquare(self) -> Optional[ISquare]:
+        raise NotImplementedError
 
-    It's thus fully connected (except for piece to board). This is done to prevent looping over pieces in order to check
-    if a square is occupied. Other implementations might use looping or use fixed indexing to check this.
-    """
+    def isEnPassantSquare(self, square: ISquare) -> bool:
+        raise NotImplementedError
 
-    def __init__(self, squareRepresentor: ISquareRepresentor = Square0x88Representor):
-        IBoard.__init__(self, squareRepresentor=squareRepresentor)
-        self.squares: List[List[SquareSCPS]] = [[None,]*8 for i in range(8)]
-        self.initializeSquares()
-        self.whitePieces = set()
-        self.blackPieces = set()
+    def isEnPassantSquareViaIdentifier(self, squareIdentifier: Any) -> bool:
+        raise NotImplementedError
 
-    def initializeSquares(self):
-        for file in range(8):
-            for rank in range(8):
-                square = SquareSCPS(board=self,
-                                    representation=self.squareRepresentor.generateViaRankAndFile(rank=rank, file=file))
-                self.addSquare(square, file, rank)
+    def getCurrentEnPassantPawnAndItsSquare(self) -> Tuple[IPawn, ISquare]:
+        raise NotImplementedError
 
-    def addSquare(self, square: SquareSCPS, file: int, rank: int):
-        assert square.getBoard() is self
-        self.squares[rank][file] = square
+    # castling
 
-    def getSquare(self, file, rank) -> ISquare:
+    def getCastlingRights(self, white: bool,  king: bool):
+        raise NotImplementedError
+
+    def getAllCastlingRights(self) -> Tuple[bool, bool, bool, bool]:
         """
-        Use this only for initialization.
+        Returns (kingside white, queenside white, kingside black, queenside black)
         """
-        return self.squares[rank][file]
+        raise NotImplementedError
 
-    def getSquares(self) -> List[List[SquareSCPS]]:
-        return self.squares
+    def getCastlingRightsOf(self, white: bool) -> Tuple[bool, bool]:
+        """
+        Returns (kingside rights, queenside rights)
+        :param white:
+        :return:
+        """
+        raise NotImplementedError
 
-    def initializePiece(self, piece: PieceSCPS, square: SquareSCPS):
-        # connection between piece and board
-        if piece.isWhite():
-            self.whitePieces.add(piece)
-        else:
-            self.blackPieces.add(piece)
-        # connection between piece and square
-        piece.moveTo(square)
+    # Move utilities
+    # All moves can be applied as a set of atomic actions. These are defined here. Moves are applied by calling \
+    # 'move.apply(board)', thereby optimally using polymorphism when 'move' is an object. However, these moves then
+    # apply themselves to the board by calling these atomic actions.
+    # The following atomic actions are enough to specify every move:
+    # - move a piece from one square to another (empty) square
+    def movePieceSC(self, start: ISquare, end: ISquare):
+        """
+        SC = Square Centric
+        End square should be empty.
+        """
+        raise NotImplementedError
 
-    def containsPiece(self, piece: IPiece):
-        if piece.isWhite():
-            return piece in self.whitePieces
-        else:
-            return piece in self.blackPieces
+    def movePiecePC(self, piece: IPiece, end: ISquare):
+        """
+        PC = Piece Centric
+        """
+        raise NotImplementedError
 
-    @classmethod
-    def getNewKing(cls, isWhite: bool) -> KingSCPS:
-        return KingSCPS(isWhite)
+    def movePieceSPC(self, piece: IPiece, start: ISquare, end: ISquare):
+        """
+        SPC = "Square and Piece Centric"
+        """
+        raise NotImplementedError
 
-    @classmethod
-    def getNewQueen(cls, isWhite: bool) -> QueenSCPS:
-        return QueenSCPS(isWhite)
+    def movePieceSCViaIdentifiers(self, startIdentifier: Any, endIdentifier: Any):
+        raise NotImplementedError
 
-    @classmethod
-    def getNewRook(cls, isWhite: bool) -> RookSCPS:
-        return RookSCPS(isWhite)
+    def movePiecePCViaIdentifiers(self, pieceIdentifier: Any, endIdentifier: Any):
+        raise NotImplementedError
 
-    @classmethod
-    def getNewBishop(cls, isWhite: bool) -> BishopSCPS:
-        return BishopSCPS(isWhite)
+    def movePieceSPCViaIdentifiers(self, pieceIdentifier: Any, startIdentifier: Any, endIdentifier: Any):
+        raise NotImplementedError
 
-    @classmethod
-    def getNewKnight(cls, isWhite: bool) -> KnightSCPS:
-        return KnightSCPS(isWhite)
+    # - take a piece off the board
+    def removePiece(self, piece: IPiece):
+        """
+        PC
+        """
+        raise NotImplementedError
 
-    @classmethod
-    def getNewPawn(cls, isWhite: bool) -> PawnSCPS:
-        return PawnSCPS(isWhite)
+    def removePieceViaIdentifier(self, pieceIdentifier: Any):
+        """
+        PC
+        """
+        raise NotImplementedError
 
-    def getMoves(self):
-        pass
+    def emptySquare(self, square: ISquare):
+        """
+        SC
+        """
+        raise NotImplementedError
 
-    def getPieceOn(self, square: SquareSCPS) -> Optional[PieceSCPS]:
-        return square.getPiece()
+    def emptySquareViaIdentifier(self, squareIdentifier: Any):
+        """
+        SC
+        """
+        raise NotImplementedError
+
+    def removePieceAndEmptySquare(self, square: ISquare, piece: IPiece):
+        """
+        SPC
+        """
+        raise NotImplementedError
+
+    def removePieceAndEmptySquareViaIdentifiers(self, squareIdentifier: Any, pieceIdentifier: Any):
+        """
+        SPC
+        """
+        raise NotImplementedError
+
+    # - put a piece on the board (moving a piece but the start square is None)
+    def putPiece(self, piece: IPiece, square: ISquare):
+        """
+        PC
+        """
+        raise NotImplementedError
+
+    def putPieceViaIdentifiers(self, pieceIdentifier: Any, squareIdentifier: Any):
+        raise NotImplementedError
+
+    # - change castling rights
+    def setCastlingRights(self, white: bool, king: bool, value: bool):
+        """
+        Castle rights are True if:
+        - the king has not moved
+        - the corresponding rook has not moved
+        - the corresponding rook has not been taken
+
+        There are four castling rights: white and black can each castle both king- and queenside.
+
+        white: castling right for white (if False it's for black)
+        king: kingside castling right if True, queenside if False
+        value: True if the rights are granted, False if they are not
+        """
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToMoveOf(self, piece: IPiece):
+        """
+        PC
+        """
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToMoveFrom(self, square: ISquare):
+        """
+        SC
+        """
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToMoveByPieceFromSquare(self, piece: IPiece, square: ISquare):
+        """
+        SPC
+        """
+        raise NotImplementedError
+
+    def setCastlingRightsOf(self, white: bool, kingsideValue: bool, queensideValue: bool):
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToCaptureOf(self, piece: IPiece):
+        """
+        PC
+        """
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToCaptureAt(self, square: ISquare):
+        """
+        SC
+        """
+        raise NotImplementedError
+
+    def applyCastlingRightChangesDueToCaptureOfPieceAtSquare(self, piece: IPiece, square: ISquare):
+        """
+        SPC
+        """
+        raise NotImplementedError
+
+    def setAllCastlingRights(self, rights: Tuple[bool, bool, bool, bool]):
+        """
+        :param rights: (kingside white, queenside white, kingside black, queenside black)
+        :return:
+        """
+        raise NotImplementedError
+
+    # - set en passant square
+    def setEnPassantSquare(self, square: Optional[ISquare]):
+        """
+        If it's None then there is no en passant square.
+        """
+        raise NotImplementedError
+
+    def setEnPassantSquareViaIdentifier(self, squareIdentifier: Any):
+        """
+        The "None" that denotes a nonexisting ep square is dependent on the square representation (i think? TODO)
+        """
+        raise NotImplementedError
+
+    def revertToPreviousEnPassantSquare(self):
+        """
+        This means the board keeps a list of en passant squares. This is done to prevent storing this info inside the
+        moves, which will surely be memory inefficient.
+        :return:
+        """
+        raise NotImplementedError
+
+    def isAttacked(self, square: ISquare, attackerIsWhite: bool):
+        """
+        Bitboards can be very fast here! # todo: if this becomes a bottleneck, implement bitboards
+        """
+        raise NotImplementedError

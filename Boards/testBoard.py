@@ -1,10 +1,11 @@
 import unittest
 
-from Boards.Board import BoardSquareCenteredWithPieceSets, IBoard
-from Squares.SquareRepresentor import Square0x88Representor
+from Boards.Board import IBoard
+from Boards.SCPSBoard import BoardSCPS
+from Squares.SquareRepresentor import Square0X88Representor
 
-boardClass = BoardSquareCenteredWithPieceSets
-squareRepresentor = Square0x88Representor()
+boardClass = BoardSCPS
+squareRepresentor = Square0X88Representor()
 
 
 class MyTestCase(unittest.TestCase):

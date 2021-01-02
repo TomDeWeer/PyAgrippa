@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from GUI.GUILayout import IGUILayout
 
+from typing import TYPE_CHECKING, Any, Generator
+
+from GUI.GUILayout import IGUILayout
+from Moves.MoveRepresentation import IMoveRepresentation
 
 if TYPE_CHECKING:
     from Boards.Board import IBoard
-    from Squares.Square import SquareSCPS
 
 
 class IPiece:
@@ -22,30 +23,19 @@ class IPiece:
     def getImage(self, layout: IGUILayout):
         raise NotImplementedError
 
-
-class PieceSCPS(IPiece):
-    """
-    Pieces for usage with a Square Centered board representation using Piece Sets.
-
-    Pieces with this board representation have a position.
-    """
-
-    def __init__(self, isWhite: bool):
-        IPiece.__init__(self, isWhite=isWhite)
-        self.square = None  # it's not on any square
-
-    def moveTo(self, square: SquareSCPS):
-        self.square = square
-        square.setPiece(self)
+    def getBoard(self) -> IBoard:
+        raise NotImplementedError
 
     def getSquare(self):
-        return self.square
+        return self.getBoard().getSquareOf(self)
 
-    def getBoard(self):
-        return self.square.getBoard() if self.square is not None else None
+    def getIdentifier(self) -> Any:
+        """
+        An identifier to communicate about pieces in a more efficient way (most of the time an integer). If a piece does
+        not have an identifier, this just returns the piece itself.
+        """
+        raise NotImplementedError
 
-
-
-
-
+    def getAllPseudoLegalMoves(self, moveRepresentation: IMoveRepresentation) -> Generator[Any, None, None]:
+        raise NotImplementedError
 

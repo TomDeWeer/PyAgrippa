@@ -1,6 +1,6 @@
-from Boards.Board import BoardSquareCenteredWithPieceSets
+from Boards.Board import BoardSCPS
 from GUI.BoardRenderer import BoardRenderer
 
-renderer = BoardRenderer(initialBoard=BoardSquareCenteredWithPieceSets.initialSetup())
+renderer = BoardRenderer(initialBoard=BoardSCPS.initialSetup())
 renderer.start()
 renderer.showAndWaitForUserInput()
