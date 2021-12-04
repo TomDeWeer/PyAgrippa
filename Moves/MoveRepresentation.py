@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from Pieces.Piece import IPiece
     from Squares.Square import ISquare
 
+
 class IMoveRepresentation(Generic[T]):
     """
     Interface to various move representations.

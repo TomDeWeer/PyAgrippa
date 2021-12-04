@@ -8,3 +8,6 @@ class IRook(ISlidingPiece):
     def getDestinationSquaresPerRay(self, start: ISquare) -> Generator[Generator[ISquare, None, None], None, None]:
         return start.getRookDestinationSquares()
 
+    def evaluate(self):
+        return self.getEvaluator().evaluateRook(self)
+

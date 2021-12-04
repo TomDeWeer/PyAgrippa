@@ -1,4 +1,5 @@
-from typing import List, Optional, Any, Tuple
+from __future__ import annotations
+from typing import List, Optional, Any, Tuple, TYPE_CHECKING
 
 from Pieces.Bishop import IBishop
 from Pieces.King import IKing
@@ -10,10 +11,13 @@ from Pieces.Rook import IRook
 from Squares.Square import ISquare
 from Squares.SquareRepresentor import ISquareRepresentor
 
+if TYPE_CHECKING:
+    from Evaluation.BoardEvaluator import BoardEvaluator
+
 
 class IBoard:
     """
-    Interface to the Boards class, representing a chess board. Due to the use of a an abstract interface, the exact
+    Interface to the Boards class, representing a chess board. Due to the use of an abstract interface, the exact
     implementation is left unspecified. This is done to allow easy extension to tougher implementations such as bitboards
     later.
     """
@@ -22,6 +26,14 @@ class IBoard:
                  squareRepresentor: ISquareRepresentor,
                  ):
         self.squareRepresentor = squareRepresentor
+        self.evaluator: Optional[BoardEvaluator] = None
+
+    def setEvaluator(self, evaluator: BoardEvaluator):
+        assert evaluator.getBoard() is self
+        self.evaluator = evaluator
+
+    def getEvaluator(self):
+        return self.evaluator
 
     def isWhiteToMove(self):
         raise NotImplementedError
@@ -124,11 +136,17 @@ class IBoard:
         else:
             return self.getLivingBlackPieces()
 
-    def getAllPieces(self):
+    def getInactivePieces(self):
+        if self.isWhiteToMove():
+            return self.getLivingBlackPieces()
+        else:
+            return self.getLivingWhitePieces()
+
+    def getAllLivingPieces(self):
         return self.getLivingBlackPieces() + self.getLivingWhitePieces()
 
     def checkValidity(self):
-        for piece in self.getAllPieces():
+        for piece in self.getAllLivingPieces():
             if not self.getPieceOn(piece.getSquare()) == piece:
                 return False
         return True

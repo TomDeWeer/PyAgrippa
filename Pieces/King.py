@@ -55,3 +55,6 @@ class IKing(IPiece):
                 else:
                     rook: IRook = board.getPieceOn(start.getRookSquare(white=self.isWhite()), king=kingside) # castling rights guarantee this
                     yield moveRepresentation.getCastlingMove(kingside=kingside, white=self.isWhite())
+
+    def evaluate(self):
+        return self.getEvaluator().evaluateKing(self)

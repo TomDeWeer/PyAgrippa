@@ -39,3 +39,9 @@ class IPiece:
     def getAllPseudoLegalMoves(self, moveRepresentation: IMoveRepresentation) -> Generator[Any, None, None]:
         raise NotImplementedError
 
+    def getEvaluator(self):
+        return self.getBoard().getEvaluator()
+
+    def evaluate(self):
+        raise NotImplementedError
+

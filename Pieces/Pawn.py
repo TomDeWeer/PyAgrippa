@@ -94,3 +94,5 @@ class IPawn(IPiece):
                             enPassantSquare=enPassantSquare)
                         # todo: only set en passant square when there is an enemy pawn that can use it
 
+    def evaluate(self):
+        return self.getEvaluator().evaluatePawn(self)

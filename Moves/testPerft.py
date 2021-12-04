@@ -16,8 +16,8 @@ class PerftTest(unittest.TestCase):
         board = boardClass(squareRepresentor)
         board.setInitialSetup()
         perft = Perft(board=board, moveGenerator=MoveGenerator(OOPMoveRepresentation()))
-        depths = [0, 1, 2]
-        correctPerfts = [1, 20, 400]
+        depths = [0, 1, 2, 3, 4, 5, 6]
+        correctPerfts = [1, 20, 400, 8902, 197742, 4897256, 120921506]  # from http://www.open-aurec.com/wbforum/viewtopic.php?f=4&t=51764, for pseudo legal (quite hard actually)
         for depth, correctPerft in zip(depths, correctPerfts):
             start = time.time()
             nbNodes = perft.pseudoLegalPerft(depth=depth)

@@ -24,3 +24,4 @@ class Perft:
             nbNodes += self.pseudoLegalPerft(depth=depth - 1)
             self.moveGenerator.getRepresentation().undoMove(move)
         return nbNodes
+

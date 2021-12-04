@@ -31,3 +31,6 @@ class IKnight(IPiece):
                     piece=self,
                     start=start,
                     end=destinationSquare)
+
+    def evaluate(self):
+        return self.getEvaluator().evaluateKnight(self)
