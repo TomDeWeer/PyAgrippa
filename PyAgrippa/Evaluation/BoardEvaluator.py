@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 
 
@@ -11,6 +10,7 @@ if TYPE_CHECKING:
     from PyAgrippa.Pieces.Pawn import IPawn
     from PyAgrippa.Pieces.Queen import IQueen
     from PyAgrippa.Pieces.Rook import IRook
+    from PyAgrippa.Boards.Board import IBoard
 
 
 class BoardEvaluator:
@@ -21,14 +21,10 @@ class BoardEvaluator:
     This does not depend on the exact board class implementation. However, the
     efficiency depends on the board class implementation.
     """
-    def __init__(self, board: IBoard):
-        self.board = board
-        board.setEvaluator(self)
+    def __init__(self):
+        pass
 
-    def getBoard(self):
-        return self.board
-
-    def evaluate(self):
+    def evaluate(self, board: IBoard):
         raise NotImplementedError
 
     def evaluatePawn(self, pawn: IPawn):

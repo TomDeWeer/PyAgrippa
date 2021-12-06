@@ -1,5 +1,7 @@
 import time
 
+from PyAgrippa.AI.Benchmarking.Benchmarker import Benchmarker
+from PyAgrippa.AI.Benchmarking.Benchmarks import BenchmarkCollection
 from PyAgrippa.AI.Negamax import Negamax
 from PyAgrippa.Boards.SCPSBoard import BoardSCPS
 from PyAgrippa.Evaluation.BoardEvaluatorViaPieces import BoardEvaluatorViaPieces
@@ -8,13 +10,8 @@ from PyAgrippa.Moves.OOPMoveRepresentation.OOPMoveRepresentation import OOPMoveR
 
 if __name__ == '__main__':
 
-    board = BoardSCPS()
-    board.setInitialSetup()
-    depth = 4
-    AI = Negamax(depth=depth, moveGenerator=MoveGenerator(moveRepresentation=OOPMoveRepresentation()),
-                 boardEvaluator=BoardEvaluatorViaPieces())
-    tic = time.time()
-    print(AI.getBestMove(board))
-    toc = time.time()
-    print(f"Best move found in {toc-tic:.2f}s.")
+    benchMarker = Benchmarker(log=False, verbose=True)
+    collection = BenchmarkCollection()
+    collection.collectAll()
+    benchMarker.processCollection(collection=collection)
 

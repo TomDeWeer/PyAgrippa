@@ -1,5 +1,6 @@
 from typing import Generator, Any
 
+from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.GUI.GUILayout import IGUILayout
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Piece import IPiece
@@ -33,5 +34,5 @@ class IKnight(IPiece):
                     start=start,
                     end=destinationSquare)
 
-    def evaluate(self):
-        return self.getEvaluator().evaluateKnight(self)
+    def evaluate(self, evaluator: BoardEvaluator):
+        return evaluator.evaluateKnight(self)

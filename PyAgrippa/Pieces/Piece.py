@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generator
 
+from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.GUI.GUILayout import IGUILayout
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 
@@ -42,9 +43,6 @@ class IPiece:
     def getAllPseudoLegalMoves(self, moveRepresentation: IMoveRepresentation) -> Generator[Any, None, None]:
         raise NotImplementedError
 
-    def getEvaluator(self):
-        return self.getBoard().getEvaluator()
-
-    def evaluate(self):
+    def evaluate(self, evaluator: BoardEvaluator):
         raise NotImplementedError
 

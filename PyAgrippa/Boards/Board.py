@@ -26,14 +26,6 @@ class IBoard:
                  squareRepresentor: ISquareRepresentor,
                  ):
         self.squareRepresentor = squareRepresentor
-        self.evaluator: Optional[BoardEvaluator] = None
-
-    def setEvaluator(self, evaluator: BoardEvaluator):
-        assert evaluator.getBoard() is self
-        self.evaluator = evaluator
-
-    def getEvaluator(self):
-        return self.evaluator
 
     def isWhiteToMove(self):
         raise NotImplementedError

@@ -12,15 +12,15 @@ class BoardEvaluatorViaPieces(BoardEvaluator):
     """
     Very basic board evaluator. Loops through the piece objects (not identifiers) and sums their values.
     """
-    def __init__(self, board: IBoard):
-        BoardEvaluator.__init__(self, board=board)
+    def __init__(self):
+        BoardEvaluator.__init__(self)
 
-    def evaluate(self):
+    def evaluate(self, board: IBoard):
         score = 0.
-        for piece in self.getBoard().getActivePieces():
-             score += piece.evaluate()
-        for piece in self.getBoard().getInactivePieces():
-            score -= piece.evaluate()
+        for piece in board.getActivePieces():
+            score += piece.evaluate(self)
+        for piece in board.getInactivePieces():
+            score -= piece.evaluate(self)
         return score
 
     def evaluatePawn(self, pawn: IPawn):

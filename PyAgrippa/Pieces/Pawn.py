@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Generator, Any, TYPE_CHECKING
 
+from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Piece import IPiece
 
@@ -94,5 +95,5 @@ class IPawn(IPiece):
                             enPassantSquare=enPassantSquare)
                         # todo: only set en passant square when there is an enemy pawn that can use it
 
-    def evaluate(self):
-        return self.getEvaluator().evaluatePawn(self)
+    def evaluate(self, evaluator: BoardEvaluator):
+        return evaluator.evaluatePawn(self)

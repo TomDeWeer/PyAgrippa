@@ -1,6 +1,11 @@
-from PyAgrippa.Boards.Board import IBoard
-from PyAgrippa.Pieces.Piece import IPiece
-from PyAgrippa.Squares.Square import ISquare
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from PyAgrippa.Boards.Board import IBoard
+    from PyAgrippa.Pieces.Piece import IPiece
+    from PyAgrippa.Squares.Square import ISquare
 
 
 class IMove:

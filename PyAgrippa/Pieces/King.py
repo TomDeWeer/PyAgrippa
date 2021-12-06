@@ -1,5 +1,6 @@
 from typing import Generator, Any
 
+from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.GUI.GUILayout import IGUILayout
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Piece import IPiece
@@ -56,5 +57,5 @@ class IKing(IPiece):
                     rook: IRook = board.getPieceOn(start.getRookSquare(white=self.isWhite()), king=kingside) # castling rights guarantee this
                     yield moveRepresentation.getCastlingMove(kingside=kingside, white=self.isWhite())
 
-    def evaluate(self):
-        return self.getEvaluator().evaluateKing(self)
+    def evaluate(self, evaluator: BoardEvaluator):
+        return evaluator.evaluateKing(self)
