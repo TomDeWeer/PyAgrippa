@@ -25,7 +25,12 @@ class IKing(IPiece):
         start = self.getSquare()
         for destinationSquare in start.getKingDestinationSquares():
             capturedPiece = board.getPieceOn(destinationSquare)
-            if capturedPiece is not None:
+            if capturedPiece is None:
+                yield moveRepresentation.generateMove(board=board,
+                                                      piece=self,
+                                                      start=start,
+                                                      end=destinationSquare)
+            else:
                 if self.isWhite() == capturedPiece.isWhite():
                     continue
                 else:
@@ -33,18 +38,14 @@ class IKing(IPiece):
                                                              end=destinationSquare,
                                                              movingPiece=self,
                                                              capturedPiece=capturedPiece)
-            yield moveRepresentation.generateMove(board=board,
-                                                  piece=self,
-                                                  start=start,
-                                                  end=destinationSquare)
 
-    def generateCastlingMoves(self, moveRepresentation):
+    def generateCastlingMoves(self, moveRepresentation: IMoveRepresentation):
         board = self.getBoard()
         start = self.getSquare()
         # kingside
-        for kingside in [True, False]:
-            if board.getCastlingRights(self.isWhite(), king=kingside):  # king hasnt moved + rook hasnt moved + rook not taken
-                kingDestination, rookDestination = start.getKingAndRookCastlingSquares(kingside=kingside,
+        for kingSide in [True, False]:
+            if board.getCastlingRights(self.isWhite(), king=kingSide):  # king hasnt moved + rook hasnt moved + rook not taken
+                kingDestination, rookDestination = start.getKingAndRookCastlingSquares(kingside=kingSide,
                                                                                        white=self.isWhite())
                 # check if there are no pieces in between
                 if board.getPieceOn(kingDestination) is not None or board.getPieceOn(rookDestination) is not None:
@@ -54,8 +55,13 @@ class IKing(IPiece):
                     if board.isAttacked(square, attackerIsWhite=not self.isWhite()):
                         break
                 else:
-                    rook: IRook = board.getPieceOn(start.getRookSquare(white=self.isWhite()), king=kingside) # castling rights guarantee this
-                    yield moveRepresentation.getCastlingMove(kingside=kingside, white=self.isWhite())
+                    rook = board.getPieceOn(board.getInitialRookSquare(white=self.isWhite(), king=kingSide))  # castling rights guarantee this
+                    assert isinstance(rook, IRook)
+                    yield moveRepresentation.generateCastlingMove(board=board, rook=rook, king=self,
+                                                                  kingSide=kingSide,
+                                                                  white=self.isWhite(),
+                                                                  kingStart=start, kingEnd=kingDestination,
+                                                                  rookStart=rook.getSquare(), rookEnd=rookDestination)
 
     def evaluate(self, evaluator: BoardEvaluator):
         return evaluator.evaluateKing(self)

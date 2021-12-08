@@ -3,6 +3,17 @@ from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.Moves.MoveGenerator import MoveGenerator
 
 
+class IChessMachineResult:
+    def getBestMove(self):
+        raise NotImplementedError
+
+    def getEvaluation(self):
+        raise NotImplementedError
+
+    def getPrincipalVariation(self):
+        raise NotImplementedError
+
+
 class ChessMachine:
     def __init__(self, moveGenerator: MoveGenerator, boardEvaluator: BoardEvaluator):
         self.moveGenerator = moveGenerator
@@ -17,5 +28,6 @@ class ChessMachine:
     def getOrderingScheme(self, depth):
         pass
 
-    def getBestMove(self, board: IBoard):
+    def computeBestMove(self, board: IBoard) -> IChessMachineResult:
         raise NotImplementedError
+

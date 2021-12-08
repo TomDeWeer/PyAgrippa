@@ -66,6 +66,18 @@ class IBoard:
     def getNewPawn(cls, isWhite: bool) -> IPawn:
         raise NotImplementedError
 
+    def getInitialRookSquare(self, white: bool, king: bool):
+        if white:
+            if king:
+                return self.getSquareAt(file=7, rank=0)
+            else:
+                return self.getSquareAt(file=0, rank=0)
+        else:
+            if king:
+                return self.getSquareAt(file=7, rank=7)
+            else:
+                return self.getSquareAt(file=0, rank=7)
+
     def setInitialSetup(self):
         # pawns
         for file in range(8):

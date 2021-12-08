@@ -1,3 +1,4 @@
+from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Rook import IRook
@@ -5,23 +6,29 @@ from PyAgrippa.Squares.Square import ISquare
 
 
 class Castling(IMove):
-    def __init__(self,
+    def __init__(self, board: IBoard,
                  king: IKing,
                  kingStart: ISquare,
                  kingEnd: ISquare,
                  rook: IRook,
                  rookStart: ISquare,
                  rookEnd: ISquare,
+                 kingSide: bool,
+                 white: bool
                  ):
+        IMove.__init__(self, board=board)
         assert self.getBoard().getPieceOn(kingStart) is king
-        assert self.getBoard().getPieceOn(rookStart) is rookStart
+        assert self.getBoard().getPieceOn(rookStart) is rook
+        assert white == king.isWhite() and white == rook.isWhite()
         self.king = king
         self.kingStart = kingStart
         self.kingEnd = kingEnd
         self.rook = rook
         self.rookStart = rookStart
         self.rookEnd = rookEnd
+        self.kingSide = kingSide
         self.previousCastlingRights = None
+        self.white = white
 
     def apply(self):
         # apply atomic actions
@@ -42,8 +49,8 @@ class Castling(IMove):
         self.getBoard().movePieceSPC(piece=self.king, start=self.kingEnd, end=self.kingStart)
 
     def applyCastlingRightChanges(self):
-        self.previousCastlingRights = self.getBoard().getAllCastlingRights() # todo: this is not memory efficient at ALL
-        self.getBoard().setCastlingRightsOf(white=self.king.isWhite(),kingsideValue=False, queensideValue=False)
+        self.previousCastlingRights = self.getBoard().getAllCastlingRights()  # todo: this is not memory efficient at ALL
+        self.getBoard().setCastlingRightsOf(white=self.white, kingsideValue=False, queensideValue=False)
 
     def undoCastlingRightChanges(self):
         self.getBoard().setAllCastlingRights(self.previousCastlingRights)

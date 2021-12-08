@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from PyAgrippa.Pieces.Pawn import IPawn
     from PyAgrippa.Pieces.Piece import IPiece
     from PyAgrippa.Squares.Square import ISquare
+    from PyAgrippa.Pieces.King import IKing
+    from PyAgrippa.Pieces.Rook import IRook
 
 
 class IMoveRepresentation(Generic[T]):
@@ -58,7 +60,8 @@ class IMoveRepresentation(Generic[T]):
         """
         raise NotImplementedError
 
-    def generateCastlingMove(self) -> T:
+    def generateCastlingMove(self, board: IBoard, king: IKing, rook: IRook, kingStart: ISquare, kingEnd: ISquare, rookStart: ISquare,
+                             rookEnd: ISquare, white: bool, kingSide: bool) -> T:
         raise NotImplementedError
 
     def generateEnPassantMove(self,

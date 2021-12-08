@@ -1,6 +1,7 @@
 from typing import List
 
 from PyAgrippa.AI.AI import ChessMachine
+from PyAgrippa.AI.AlphaBetaPruner import AlphaBetaPruner
 from PyAgrippa.AI.Negamax import Negamax
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Boards.SCPSBoard import BoardSCPS
@@ -37,10 +38,10 @@ class BenchmarkCollection:
         boards = [BoardSCPS().setInitialSetup()]
         machines = []
         for depth in [2, 3, 4]:
-            machines.append(Negamax(depth=depth, moveGenerator=MoveGenerator(moveRepresentation=OOPMoveRepresentation()),
-                         boardEvaluator=BoardEvaluatorViaPieces()))
+            machines.append(
+                Negamax(depth=depth, moveGenerator=MoveGenerator(moveRepresentation=OOPMoveRepresentation()),
+                        boardEvaluator=BoardEvaluatorViaPieces()))
+            machines.append(
+                AlphaBetaPruner(depth=depth, moveGenerator=MoveGenerator(moveRepresentation=OOPMoveRepresentation()),
+                                boardEvaluator=BoardEvaluatorViaPieces()))
         self.collectFromCombinations(boards=boards, machines=machines)
-
-
-
-

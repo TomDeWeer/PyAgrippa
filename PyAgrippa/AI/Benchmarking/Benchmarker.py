@@ -15,10 +15,11 @@ class Benchmarker:
         if self.verbose:
             print(f"Benchmarking {board} with {machine}.")
         tic = time.time()
-        print(machine.getBestMove(board))
+        result = machine.computeBestMove(board)
         toc = time.time()
         if self.verbose:
-            print(f"Best move found in {toc - tic:.2f}s.")
+            print(f"Best move = {result.getBestMove()} with evaluation {result.getEvaluation()}. "
+                  f"Found in {toc - tic:.2f}s.")
 
     def processCollection(self, collection: BenchmarkCollection):
         for benchMark in collection.getBenchmarks():

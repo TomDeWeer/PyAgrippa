@@ -2,12 +2,15 @@ from typing import Optional, Generator
 
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
+from PyAgrippa.Moves.OOPMoveRepresentation.Castling import Castling
 from PyAgrippa.Moves.OOPMoveRepresentation.DoublePawnAdvancement import DoublePawnAdvancement
 from PyAgrippa.Moves.OOPMoveRepresentation.EnPassant import EnPassant
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove, NormalMove, CapturingMove
 from PyAgrippa.Moves.OOPMoveRepresentation.Promotions import Promotion, PromotionToQueen, PromotionToKnight
+from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Pawn import IPawn
 from PyAgrippa.Pieces.Piece import IPiece
+from PyAgrippa.Pieces.Rook import IRook
 from PyAgrippa.Squares.Square import ISquare
 
 
@@ -50,8 +53,10 @@ class OOPMoveRepresentation(IMoveRepresentation):
                                 start=start, promotionSquare=promotionSquare,
                                 pawn=pawn)
 
-    def generateCastlingMove(self) -> IMove:
-        pass
+    def generateCastlingMove(self, board: IBoard, king: IKing, rook: IRook, kingStart: ISquare, kingEnd: ISquare, rookStart: ISquare,
+                             rookEnd: ISquare, white: bool, kingSide: bool) -> Castling:
+        return Castling(king=king, kingStart=kingStart, kingEnd=kingEnd, kingSide=kingSide, rook=rook,
+                        rookStart=rookStart, rookEnd=rookEnd, board=board, white=white)
 
     def generateEnPassantMove(self,
                               board: IBoard,
