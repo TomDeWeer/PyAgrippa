@@ -1,7 +1,7 @@
 from typing import Optional, Generator
 
 from PyAgrippa.Boards.Board import IBoard
-from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation, T
 from PyAgrippa.Moves.OOPMoveRepresentation.Castling import Castling
 from PyAgrippa.Moves.OOPMoveRepresentation.DoublePawnAdvancement import DoublePawnAdvancement
 from PyAgrippa.Moves.OOPMoveRepresentation.EnPassant import EnPassant
@@ -89,19 +89,28 @@ class OOPMoveRepresentation(IMoveRepresentation):
         )
 
     def isEnPassant(self, move: IMove):
-        pass
+        raise NotImplementedError
 
     def getStartingSquare(self, move: IMove) -> ISquare:
-        pass
+        raise NotImplementedError
 
     def getEndingSquare(self, move: IMove) -> IMove:
-        pass
+        raise NotImplementedError
 
     def getStartingSquareIdentifier(self, move: IMove):
-        pass
+        raise NotImplementedError
 
     def getEndingSquareIdentifier(self, move: IMove):
-        pass
+        raise NotImplementedError
+
+    def getCapturedPiece(self, move: IMove) -> Optional[IPiece]:
+        return move.getCapturedPiece()
+
+    def getPromotedPiece(self, move: IMove) -> Optional[IPiece]:
+        return move.getPromotedPiece()
+
+    def getMovingPiece(self, move: IMove) -> IPiece:
+        return move.getMovingPiece()
 
     def applyMove(self, move: IMove):
         move.applyCastlingRightChanges()  # MUST happen first!

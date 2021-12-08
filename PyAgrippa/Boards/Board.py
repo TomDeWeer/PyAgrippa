@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import List, Optional, Any, Tuple, TYPE_CHECKING
 
+import chess as python_chess
+
 from PyAgrippa.Pieces.Bishop import IBishop
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Knight import IKnight
@@ -128,6 +130,53 @@ class IBoard:
         self.setAllCastlingRights((True, True, True, True))
         return self
 
+    @classmethod
+    def fromFEN(cls, fen: str, squareRepresentor: ISquareRepresentor) -> IBoard:
+        pychessBoard = python_chess.Board(fen)
+        nativeBoard = cls(squareRepresentor=squareRepresentor)
+        # pieces
+        for file in range(8):
+            for rank in range(8):
+                nativeSquare = nativeBoard.getSquareAt(file=file, rank=rank)
+                pychessPiece = pychessBoard.piece_at(python_chess.square(file_index=file, rank_index=rank))
+                if pychessPiece is not None:
+                    white = True if pychessPiece.color is python_chess.WHITE else False
+                    if python_chess.piece_name(pychessPiece.piece_type) == 'pawn':
+                        nativePiece = nativeBoard.getNewPawn(isWhite=white)
+                    elif python_chess.piece_name(pychessPiece.piece_type) == 'knight':
+                        nativePiece = nativeBoard.getNewKnight(isWhite=white)
+                    elif python_chess.piece_name(pychessPiece.piece_type) == 'bishop':
+                        nativePiece = nativeBoard.getNewBishop(isWhite=white)
+                    elif python_chess.piece_name(pychessPiece.piece_type) == 'rook':
+                        nativePiece = nativeBoard.getNewRook(isWhite=white)
+                    elif python_chess.piece_name(pychessPiece.piece_type) == 'queen':
+                        nativePiece = nativeBoard.getNewQueen(isWhite=white)
+                    elif python_chess.piece_name(pychessPiece.piece_type) == 'king':
+                        nativePiece = nativeBoard.getNewKing(isWhite=white)
+                    else:
+                        raise NotImplementedError
+                    nativeBoard.putPiece(piece=nativePiece,
+                                         square=nativeSquare)
+        # side to move
+        if pychessBoard.turn is python_chess.WHITE:
+            nativeBoard.setWhiteToMove()
+        else:
+            nativeBoard.setBlackToMove()
+        # castling rights
+        for white in [True, False]:
+            color = python_chess.WHITE if white else python_chess.BLACK
+            nativeBoard.setCastlingRightsOf(white=white,
+                                            kingsideValue=pychessBoard.has_kingside_castling_rights(color=color),
+                                            queensideValue=pychessBoard.has_queenside_castling_rights(color=color))
+        # en passant
+        if pychessBoard.ep_square is None:
+            nativeBoard.setEnPassantSquare(None)
+        else:
+            ep_file = python_chess.square_file(pychessBoard.ep_square)
+            ep_rank = python_chess.square_rank(pychessBoard.ep_square)
+            nativeBoard.setEnPassantSquare(square=nativeBoard.getSquareAt(file=ep_file, rank=ep_rank))
+        return nativeBoard
+
     def getLivingWhitePieces(self) -> List[IPiece]:
         raise NotImplementedError
 
@@ -155,10 +204,7 @@ class IBoard:
                 return False
         return True
 
-    def getSquareAt(self, file, rank) -> ISquare:
-        """
-        Use this only for initialization.
-        """
+    def getSquareAt(self, file: int, rank: int) -> ISquare:
         raise NotImplementedError
 
     def getIdentifierOfSquare(self, square: ISquare):
@@ -198,7 +244,7 @@ class IBoard:
 
     # castling
 
-    def getCastlingRights(self, white: bool,  king: bool):
+    def getCastlingRights(self, white: bool, king: bool):
         raise NotImplementedError
 
     def getAllCastlingRights(self) -> Tuple[bool, bool, bool, bool]:

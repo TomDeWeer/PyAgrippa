@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 
 
@@ -15,8 +17,7 @@ if TYPE_CHECKING:
 
 class BoardEvaluator:
     """
-    Evaluates how good a given board is for the active player.
-
+    Evaluates a board.
 
     This does not depend on the exact board class implementation. However, the
     efficiency depends on the board class implementation.
@@ -25,6 +26,9 @@ class BoardEvaluator:
         pass
 
     def evaluate(self, board: IBoard):
+        """
+        Evaluates how good a given board is for the active player.
+        """
         raise NotImplementedError
 
     def evaluatePawn(self, pawn: IPawn):
@@ -48,14 +52,18 @@ class BoardEvaluator:
     def supportsIncrementalCalculation(self) -> bool:
         raise NotImplementedError
 
-    def initializeIncremental(self, board: IBoard):
+    def initializeIncremental(self, board: IBoard, moveRepresentation: IMoveRepresentation):
         raise NotImplementedError
 
-    def get(self):
+    def getScore(self):
+        """
+        Evaluates how good the board is for the INITIALLY active player (controllable with initializeIncremental), after
+        the played moves (controllable with applyMove and undoLast).
+        """
         raise NotImplementedError
 
-    def update(self, move: IMove):
+    def applyMove(self, move: IMove):
         raise NotImplementedError
 
-    def undo(self, move: IMove):
+    def undoLast(self):
         raise NotImplementedError

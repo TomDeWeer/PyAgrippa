@@ -101,6 +101,15 @@ class IMoveRepresentation(Generic[T]):
     def getEndingSquareIdentifier(self, move: T):
         raise NotImplementedError
 
+    def getCapturedPiece(self, move: T) -> Optional[IPiece]:
+        raise NotImplementedError
+
+    def getPromotedPiece(self, move: T) -> Optional[IPiece]:
+        raise NotImplementedError
+
+    def getMovingPiece(self, move: T) -> IPiece:
+        raise NotImplementedError
+
     def applyMove(self, move: T):  # todo: it's maybe not logical that a representation applies a move
         raise NotImplementedError
 

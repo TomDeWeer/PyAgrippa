@@ -30,6 +30,9 @@ class Castling(IMove):
         self.previousCastlingRights = None
         self.white = white
 
+    def getMovingPiece(self):
+        return self.king
+
     def apply(self):
         # apply atomic actions
         # 1. move the king

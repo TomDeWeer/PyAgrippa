@@ -26,6 +26,12 @@ class Promotion(IMove):
         self.capturedPiece = capturedPiece
         self.previousCastlingRights = None
 
+    def getMovingPiece(self):
+        return self.pawn
+
+    def getCapturedPiece(self) -> Optional[IPiece]:
+        return self.capturedPiece
+
     def apply(self):
         # four atomic actions
         # 1. remove the captured piece

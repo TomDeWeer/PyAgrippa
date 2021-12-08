@@ -89,10 +89,7 @@ class BoardSCPS(IBoard):
         assert square.getBoard() is self
         self.squares[self.getIdentifierOfSquare(square)] = square
 
-    def getSquareAt(self, file, rank) -> ISquare:
-        """
-        Use this only for initialization.
-        """
+    def getSquareAt(self, file: int, rank: int) -> SquareSCPS:
         return self.getSquares()[rank][file]
 
     def getSquares(self) -> List[List[SquareSCPS]]:

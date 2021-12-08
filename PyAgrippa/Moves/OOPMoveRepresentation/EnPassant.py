@@ -1,6 +1,9 @@
+from typing import Optional
+
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 from PyAgrippa.Pieces.Pawn import IPawn
+from PyAgrippa.Pieces.Piece import IPiece
 from PyAgrippa.Squares.Square import ISquare
 
 
@@ -20,6 +23,12 @@ class EnPassant(IMove):
         self.capturedSquare = capturedSquare
         self.movingPiece = movingPiece
         self.capturedPiece = capturedPiece
+
+    def getMovingPiece(self):
+        return self.movingPiece
+
+    def getCapturedPiece(self) -> Optional[IPiece]:
+        return self.capturedPiece
 
     def apply(self):
         # apply atomic actions

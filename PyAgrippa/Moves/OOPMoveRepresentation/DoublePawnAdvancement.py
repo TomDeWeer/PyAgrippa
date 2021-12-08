@@ -18,6 +18,9 @@ class DoublePawnAdvancement(IMove):
         self.movingPiece = movingPiece
         self.enPassantSquare = enPassantSquare
 
+    def getMovingPiece(self):
+        return self.movingPiece
+
     def apply(self):
         # apply atomic actions
         # 1. move the piece

@@ -19,7 +19,7 @@ class ISquare:
         self.board = board
 
     def __str__(self):
-        return f"{'abcdefgh'[self.getFile()-1]}{self.getRank()}"
+        return f"{'abcdefgh'[self.getFile()]}{self.getRank()+1}"
 
     def getBoard(self) -> IBoard:
         return self.board

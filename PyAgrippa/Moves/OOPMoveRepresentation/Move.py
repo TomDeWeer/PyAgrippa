@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from PyAgrippa.Boards.Board import IBoard
@@ -38,6 +37,15 @@ class IMove:
     def undoCastlingRightChanges(self):
         raise NotImplementedError
 
+    def getCapturedPiece(self) -> Optional[IPiece]:
+        return None
+
+    def getPromotedPiece(self) -> Optional[IPiece]:
+        return None
+
+    def getMovingPiece(self):
+        raise NotImplementedError
+
 
 class NormalMove(IMove):
     def __init__(self, board: IBoard, start: ISquare, end: ISquare, piece: IPiece):
@@ -59,6 +67,9 @@ class NormalMove(IMove):
     def undo(self):
         self.getBoard().movePieceSPC(piece=self.piece, start=self.end, end=self.start)
         self.getBoard().revertToPreviousEnPassantSquare()
+
+    def getMovingPiece(self):
+        return self.piece
 
     def applyCastlingRightChanges(self):
         self.previousCastlingRights = self.getBoard().getCastlingRightsOf(white=self.piece.isWhite())
@@ -83,6 +94,12 @@ class CapturingMove(IMove):
         self.movingPiece = movingPiece
         self.capturedPiece = capturedPiece
         self.previousCastlingRights = None
+
+    def getCapturedPiece(self) -> Optional[IPiece]:
+        return self.capturedPiece
+
+    def getMovingPiece(self):
+        return self.movingPiece
 
     def apply(self):
         # apply atomic actions
