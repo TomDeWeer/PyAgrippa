@@ -1,0 +1,3 @@
+class HashTableEntry:
+    pass
+

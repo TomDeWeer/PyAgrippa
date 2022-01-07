@@ -10,6 +10,9 @@ class KnightSCPS(PieceSCPS, IKnight):
     def applyCastlingRightChangesDueToMove(self):
         return
 
+    def castlingRightsChangeDueToMove(self):
+        return False
+
     def applyCastlingRightChangesDueToCapture(self):
         return
 

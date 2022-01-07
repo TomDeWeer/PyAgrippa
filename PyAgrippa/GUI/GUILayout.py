@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional
 
 
@@ -27,37 +28,37 @@ class IGUILayout:
     def getBlackKnightImage(self) -> str:
         return os.path.join(self.getPieceIconPath(), 'knightb.png')
 
-    def getWhiteKnightImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'knightw.png')
+    def getWhiteKnightImage(self) -> Path:
+        return self.getPieceIconPath() / 'knightw.png'
 
-    def getBlackBishopImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'bishopb.png')
+    def getBlackBishopImage(self) -> Path:
+        return self.getPieceIconPath() / 'bishopb.png'
 
-    def getWhiteBishopImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'bishopw.png')
+    def getWhiteBishopImage(self) -> Path:
+        return self.getPieceIconPath() / 'bishopw.png'
 
-    def getBlackRookImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'rookb.png')
+    def getBlackRookImage(self) -> Path:
+        return self.getPieceIconPath() / 'rookb.png'
 
-    def getWhiteRookImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'rookw.png')
+    def getWhiteRookImage(self) -> Path:
+        return self.getPieceIconPath() / 'rookw.png'
 
-    def getBlackQueenImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'queenb.png')
+    def getBlackQueenImage(self) -> Path:
+        return self.getPieceIconPath() / 'queenb.png'
 
-    def getWhiteQueenImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'queenw.png')
+    def getWhiteQueenImage(self) -> Path:
+        return self.getPieceIconPath() / 'queenw.png'
 
-    def getBlackKingImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'kingb.png')
+    def getBlackKingImage(self) -> Path:
+        return self.getPieceIconPath() / 'kingb.png'
 
-    def getWhiteKingImage(self) -> str:
-        return os.path.join(self.getPieceIconPath(), 'kingw.png')
+    def getWhiteKingImage(self) -> Path:
+        return self.getPieceIconPath() / 'kingw.png'
 
     def getBlankImage(self):
-        return os.path.join(self.getPieceIconPath(), 'blank.png')
+        return self.getPieceIconPath() / 'blank.png'
 
-    def getPieceIconPath(self) -> str:
+    def getPieceIconPath(self) -> Path:
         raise NotImplementedError
 
     def getLightSquareColor(self) -> str:
@@ -69,8 +70,8 @@ class IGUILayout:
 
 class DefaultGUILayout(IGUILayout):
 
-    def getPieceIconPath(self) -> str:
-        return './PieceIcons/Default'  # path to the chess pieces
+    def getPieceIconPath(self) -> Path:
+        return Path(__file__).parent / 'PieceIcons' / 'Default'  # path to the chess pieces
 
     def getSGLookAndFeel(self) -> str:
         return "BrownBlue"

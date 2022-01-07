@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Optional, Any
 
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
 from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
-from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 from PyAgrippa.Pieces.Bishop import IBishop
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Knight import IKnight
@@ -31,22 +30,22 @@ class BoardEvaluatorViaPieces(BoardEvaluator):
         return score
 
     def evaluatePawn(self, pawn: IPawn):
-        return 1.
+        return 100
 
     def evaluateKnight(self, knight: IKnight):
-        return 3.
+        return 300
 
     def evaluateBishop(self, bishop: IBishop):
-        return 3.25
+        return 325
 
     def evaluateRook(self, rook: IRook):
-        return 5.
+        return 500.
 
     def evaluateQueen(self, queen: IQueen):
-        return 9.
+        return 900.
 
     def evaluateKing(self, king: IKing):
-        return 1000.
+        return 20000.
 
     def supportsIncrementalCalculation(self) -> bool:
         return True
@@ -63,7 +62,7 @@ class BoardEvaluatorViaPieces(BoardEvaluator):
         """
         return self.currentScore
 
-    def applyMove(self, move: IMove):
+    def evaluateMove(self, move: Any):
         delta = 0.
         # captured piece
         capturedPiece = self.moveRepresentation.getCapturedPiece(move=move)

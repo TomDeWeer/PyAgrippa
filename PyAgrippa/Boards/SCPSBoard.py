@@ -1,6 +1,10 @@
 from typing import List, Optional, Dict, Any, Tuple
 
+from chess.polyglot import zobrist_hash
+
 from PyAgrippa.Boards.Board import IBoard
+from PyAgrippa.Games.Outcome import Outcome
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Bishop import IBishop
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Knight import IKnight
@@ -53,6 +57,66 @@ class BoardSCPS(IBoard):
         self.livingBlackPieceIdentifiers = set()
         self.previous: List[List[bool]] = []
         self.castlingRights: Tuple[bool, bool, bool, bool] = (True, True, True, True)
+        self.blackKingIdentifier: IKing = None  # todo: reconsider this implementation of checking if the game is over
+        self.whiteKingIdentifier: IKing = None
+        self.halfMoveClocks = [0, ]
+
+    def clear(self):  # todo: this is duplicated code!
+        self.squares: Dict[Any, SquareSCPS] = {}
+        self.squaresListOfLists = None
+        self.initializeSquares()
+        self.allPieces: List[PieceSCPS] = []
+        self.whiteToMove = True
+        self.enPassantSquares: List[Optional[SquareSCPS]] = []
+        self.livingWhitePieceIdentifiers = set()
+        self.livingBlackPieceIdentifiers = set()
+        self.previous: List[List[bool]] = []
+        self.castlingRights: Tuple[bool, bool, bool, bool] = (True, True, True, True)
+        self.blackKingIdentifier: IKing = None
+        self.whiteKingIdentifier: IKing = None
+        self.halfMoveClocks = [0, ]
+
+    def __hash__(self):
+        '''
+        Zobrist hashing implemented with the python-chess module. # todo: allow incremental hashing!
+        :return:
+        '''
+        pyboard = self.toPythonChessBoard()
+        return zobrist_hash(pyboard)
+
+    # def __eq__(self, other):
+    #     return hash()
+
+    def implementsHashing(self):
+        return True
+
+    def getOutcome(self) -> Outcome:   # todo: this actually belongs to the Game class...
+        # todo: implement checkmate, draw by fivefold repetition, 75 move rule
+        if self.whiteKingTaken():
+            return Outcome.BLACK_WINS
+        elif self.blackKingTaken():
+            return Outcome.WHITE_WINS
+        elif self.isDraw():
+            return Outcome.DRAW
+        else:
+            return Outcome.UNDECIDED
+
+    def isDraw(self):
+        # todo: for now assuming a draw doesnt exist (handled by game class)...
+        return False
+
+    def activePlayerCanClaimDraw(self):
+        # todo: implement threefold repetition and fifty move rule
+        raise NotImplementedError
+
+    def kingTaken(self):
+        return self.whiteKingIdentifier not in self.livingWhitePieceIdentifiers or self.blackKingIdentifier not in self.livingBlackPieceIdentifiers
+
+    def whiteKingTaken(self):
+        return self.whiteKingIdentifier not in self.livingWhitePieceIdentifiers
+
+    def blackKingTaken(self):
+        return self.blackKingIdentifier not in self.livingBlackPieceIdentifiers
 
     def isWhiteToMove(self):
         return self.whiteToMove
@@ -65,6 +129,21 @@ class BoardSCPS(IBoard):
 
     def setBlackToMove(self):
         self.whiteToMove = False
+
+    def getHalfMoveClock(self):
+        return self.halfMoveClocks[-1]
+
+    def incrementHalfMoveClock(self):
+        self.halfMoveClocks.append(self.getHalfMoveClock()+1)
+
+    def resetHalfMoveClock(self):
+        self.halfMoveClocks.append(0)
+
+    def setHalfMoveClock(self, clock: int):
+        self.halfMoveClocks.append(clock)
+
+    def revertToPreviousHalfMoveClock(self):
+        self.halfMoveClocks = self.halfMoveClocks[0:-1]
 
     def getLivingWhitePieces(self) -> List[PieceSCPS]:
         return [self.allPieces[index] for index in self.livingWhitePieceIdentifiers]
@@ -104,6 +183,13 @@ class BoardSCPS(IBoard):
     def getNewPiece(self, isWhite: bool, pieceClass):
         identifier = len(self.allPieces)
         piece = pieceClass(isWhite=isWhite, identifier=identifier)
+        if isinstance(piece, IKing):
+            if isWhite:
+                assert self.whiteKingIdentifier is None
+                self.whiteKingIdentifier = identifier
+            else:
+                assert self.blackKingIdentifier is None
+                self.blackKingIdentifier = identifier
         self.allPieces.append(piece)
         return piece
 
@@ -255,19 +341,20 @@ class BoardSCPS(IBoard):
         """
         piece.applyCastlingRightChangesDueToMove()
 
-
     def applyCastlingRightChangesDueToMoveFrom(self, square: SquareSCPS):
         """
         SC
         """
         square.getPiece().applyCastlingRightChangesDueToMove()
 
-
     def applyCastlingRightChangesDueToMoveByPieceFromSquare(self, piece: PieceSCPS, square: SquareSCPS):
         """
         SPC
         """
         piece.applyCastlingRightChangesDueToMove()
+
+    def moveByPieceFromSquareChangesCastlingRights(self, piece: PieceSCPS, square: ISquare) -> bool:
+        return piece.castlingRightsChangeDueToMove()
 
     def applyCastlingRightChangesDueToCaptureOf(self, piece: PieceSCPS):
         """
@@ -302,11 +389,10 @@ class BoardSCPS(IBoard):
             for originSquare in raySquares:
                 possiblePiece = self.getPieceOn(originSquare)
                 if possiblePiece is not None:
-                    if isinstance(possiblePiece, IQueen) or isinstance(possiblePiece, IBishop):
-                        if attackerIsWhite == possiblePiece.isWhite():
-                            return True  # unobstructed bishop or queen
-                        else:
-                            break  # obstruction by own pieces, break off ray
+                    if (isinstance(possiblePiece, IQueen) or isinstance(possiblePiece, IBishop)) and attackerIsWhite == possiblePiece.isWhite():
+                        return True  # unobstructed bishop or queen
+                    else:
+                        break  # obstruction by own pieces, break off ray
                 else:
                     continue
         # rooks (and queens)
@@ -314,11 +400,10 @@ class BoardSCPS(IBoard):
             for originSquare in raySquares:
                 possiblePiece = self.getPieceOn(originSquare)
                 if possiblePiece is not None:
-                    if isinstance(possiblePiece, IQueen) or isinstance(possiblePiece, IRook):
-                        if attackerIsWhite == possiblePiece.isWhite():
-                            return True  # unobstructed rook or queen
-                        else:
-                            break  # obstruction by own pieces, break off ray
+                    if (isinstance(possiblePiece, IQueen) or isinstance(possiblePiece, IRook)) and attackerIsWhite == possiblePiece.isWhite():
+                        return True  # unobstructed rook or queen
+                    else:
+                        break  # obstruction by own pieces, break off ray
                 else:
                     continue
         # pawns
@@ -349,6 +434,7 @@ class BoardSCPS(IBoard):
         piece.moveTo(end)
 
     def movePieceSPC(self, piece: PieceSCPS, start: SquareSCPS, end: SquareSCPS):
+        assert self.getPieceOn(end) is None
         piece.moveTo(end)
 
     def movePieceSCViaIdentifiers(self, startIdentifier: Any, endIdentifier: Any):
@@ -414,9 +500,18 @@ class BoardSCPS(IBoard):
             piece=self.getPieceViaIdentifier(pieceIdentifier)
         )
 
+    def isLegalMove(self, move: Any, representation: IMoveRepresentation):
+        piece = representation.getMovingPiece(move)
+        return piece.isLegalMove(move, representation)
 
+    def isPseudoLegalMove(self, move: Any, representation: IMoveRepresentation):
+        piece = representation.getMovingPiece(move)
+        assert piece.isWhite() is self.isWhiteToMove()
+        return piece.isPseudoLegalMove(move, representation)
 
-
+    def checkValidity(self):
+        for piece in self.getAllLivingPieces():
+            assert self.getPieceOn(piece.getSquare()) is piece
 
 
 

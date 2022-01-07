@@ -22,3 +22,4 @@ class Square0X88Representor(ISquareRepresentor):
     def generateViaRankAndFile(cls, rank, file):
         index = 16 * rank + file
         return Square0x88Representation(index)
+

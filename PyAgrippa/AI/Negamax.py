@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 from PyAgrippa.AI.AI import ChessMachine, IChessMachineResult
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
 from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
 
 
@@ -20,9 +20,14 @@ class NegamaxResult(IChessMachineResult):
 
 
 class Negamax(ChessMachine):
-    def __init__(self, depth: int, moveGenerator: MoveGenerator, boardEvaluator: BoardEvaluator):
+    def __init__(self, depth: int, moveGenerator: AbstractMoveGenerator, boardEvaluator: BoardEvaluator):
         self.depth = depth
-        ChessMachine.__init__(self, moveGenerator=moveGenerator, boardEvaluator=boardEvaluator)
+        self.boardEvaluator = boardEvaluator
+        self.moveGenerator = moveGenerator
+        ChessMachine.__init__(self, moveRepresentation=moveGenerator.getRepresentation())
+
+    def getBoardEvaluator(self):
+        return self.boardEvaluator
 
     def computeBestMove(self, board: IBoard) -> NegamaxResult:
         bestScore, bestMove = self.__getBestMove__(board, depth=self.depth)
@@ -32,7 +37,7 @@ class Negamax(ChessMachine):
         evaluator = self.getBoardEvaluator()
         if depth == 0:
             return evaluator.evaluate(board), None
-        moveGenerator = self.getMoveGenerator()
+        moveGenerator = self.moveGenerator
         moveRepresentation = moveGenerator.getRepresentation()
         bestScore = float('-inf')
         bestMove = None

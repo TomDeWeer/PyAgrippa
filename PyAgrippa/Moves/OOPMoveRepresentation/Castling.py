@@ -30,8 +30,35 @@ class Castling(IMove):
         self.previousCastlingRights = None
         self.white = white
 
+    def getStartingSquare(self):
+        return self.kingStart
+
+    def getEndingSquare(self):
+        return self.kingEnd
+
+    def isCastling(self):
+        return True
+
+    def isKingsideCastling(self):
+        return self.kingSide
+
+    def isQueensideCastling(self):
+        return not self.kingSide
+
+    def __str__(self):
+        return f"{'Kingside' if self.kingSide else 'Queenside'} castle of {self.king}"
+
+    def __eq__(self, other: IMove):
+        if isinstance(other, Castling):
+            return self.white == other.white and self.kingSide is other.kingSide and self.previousCastlingRights == other.previousCastlingRights
+        else:
+            return False
+
     def getMovingPiece(self):
         return self.king
+
+    def isWhiteMove(self):
+        return self.white
 
     def apply(self):
         # apply atomic actions
@@ -41,6 +68,8 @@ class Castling(IMove):
         self.getBoard().movePieceSPC(piece=self.rook, start=self.rookStart, end=self.rookEnd)
         # 3. en passant
         self.getBoard().setEnPassantSquare(None)
+        # 4. half move clock
+        self.getBoard().resetHalfMoveClock()
 
     def undo(self):
         # atomic actions
@@ -50,13 +79,17 @@ class Castling(IMove):
         self.getBoard().movePieceSPC(piece=self.rook, start=self.rookEnd, end=self.rookStart)
         # 2. move the king back
         self.getBoard().movePieceSPC(piece=self.king, start=self.kingEnd, end=self.kingStart)
+        # 4. half move clock
+        self.getBoard().revertToPreviousHalfMoveClock()
 
     def applyCastlingRightChanges(self):
+        assert self.previousCastlingRights is None
         self.previousCastlingRights = self.getBoard().getAllCastlingRights()  # todo: this is not memory efficient at ALL
         self.getBoard().setCastlingRightsOf(white=self.white, kingsideValue=False, queensideValue=False)
 
     def undoCastlingRightChanges(self):
         self.getBoard().setAllCastlingRights(self.previousCastlingRights)
+        self.previousCastlingRights = None
 
 
 

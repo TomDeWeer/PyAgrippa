@@ -3,6 +3,8 @@ from typing import List, Optional, Any, Tuple, TYPE_CHECKING
 
 import chess as python_chess
 
+from PyAgrippa.Games.Outcome import Outcome
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Bishop import IBishop
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Knight import IKnight
@@ -29,6 +31,19 @@ class IBoard:
                  ):
         self.squareRepresentor = squareRepresentor
 
+    def __hash__(self):
+        raise NotImplementedError
+
+    def implementsHashing(self):
+        try:
+            hash(self)
+            return True
+        except NotImplementedError:
+            return False
+
+    def getSquareRepresentor(self):
+        return self.squareRepresentor
+
     def isWhiteToMove(self):
         raise NotImplementedError
 
@@ -39,6 +54,21 @@ class IBoard:
         raise NotImplementedError
 
     def setBlackToMove(self):
+        raise NotImplementedError
+
+    def getHalfMoveClock(self):
+        raise NotImplementedError
+
+    def incrementHalfMoveClock(self):
+        raise NotImplementedError
+
+    def resetHalfMoveClock(self):
+        raise NotImplementedError
+
+    def setHalfMoveClock(self, clock: int):
+        raise NotImplementedError
+
+    def revertToPreviousHalfMoveClock(self):
         raise NotImplementedError
 
     def containsPiece(self, piece: IPiece):
@@ -175,7 +205,34 @@ class IBoard:
             ep_file = python_chess.square_file(pychessBoard.ep_square)
             ep_rank = python_chess.square_rank(pychessBoard.ep_square)
             nativeBoard.setEnPassantSquare(square=nativeBoard.getSquareAt(file=ep_file, rank=ep_rank))
+        # half move clock
+        nativeBoard.setHalfMoveClock(clock=pychessBoard.halfmove_clock)
         return nativeBoard
+
+    def toPythonChessBoard(self) -> python_chess.Board:
+        pyboard = python_chess.Board()
+        pyboard.clear()
+        for piece in self.getAllLivingPieces():
+            square = piece.getSquare()
+            pySquare = square.toPythonChess()
+            pyPieceType = piece.getPythonChessPieceType()
+            pyPiece = python_chess.Piece(color=piece.isWhite(), piece_type=pyPieceType)
+            pyboard.set_piece_at(square=pySquare, piece=pyPiece)
+        castlingFEN = f"{'K' if self.getCastlingRights(white=True, king=True) else ''}" \
+                        f"{'Q' if self.getCastlingRights(white=True, king=False) else ''}" \
+                        f"{'k' if self.getCastlingRights(white=False, king=True) else ''}" \
+                        f"{'q' if self.getCastlingRights(white=False, king=False) else ''}"
+        if len(castlingFEN) == 0:
+            castlingFEN = "-"
+        pyboard.set_castling_fen(castling_fen=castlingFEN)
+        pyboard.ep_square = self.getEnPassantSquare().toPythonChess() if self.getEnPassantSquare() is not None else None
+        pyboard.halfmove_clock = self.getHalfMoveClock()
+        pyboard.turn = self.isWhiteToMove()
+        return pyboard
+
+    def toFEN(self):
+        pychessBoard = self.toPythonChessBoard()
+        return pychessBoard.fen()
 
     def getLivingWhitePieces(self) -> List[IPiece]:
         raise NotImplementedError
@@ -199,13 +256,15 @@ class IBoard:
         return self.getLivingBlackPieces() + self.getLivingWhitePieces()
 
     def checkValidity(self):
-        for piece in self.getAllLivingPieces():
-            if not self.getPieceOn(piece.getSquare()) == piece:
-                return False
-        return True
+        raise NotImplementedError
 
     def getSquareAt(self, file: int, rank: int) -> ISquare:
         raise NotImplementedError
+
+    def getSquareViaStr(self, square: str):
+        rank = '12345678'.index(square[1])
+        file = 'abcdefgh'.index(square[0])
+        return self.getSquareAt(rank=rank, file=file)
 
     def getIdentifierOfSquare(self, square: ISquare):
         raise NotImplementedError
@@ -376,6 +435,9 @@ class IBoard:
         """
         raise NotImplementedError
 
+    def moveByPieceFromSquareChangesCastlingRights(self, piece: IPiece, square: ISquare) -> bool:
+        raise NotImplementedError
+
     def setCastlingRightsOf(self, white: bool, kingsideValue: bool, queensideValue: bool):
         raise NotImplementedError
 
@@ -430,3 +492,32 @@ class IBoard:
         Bitboards can be very fast here! # todo: if this becomes a bottleneck, implement bitboards
         """
         raise NotImplementedError
+
+    def isGameOver(self) -> bool:
+        return self.getOutcome() is not Outcome.UNDECIDED
+
+    def getOutcome(self) -> Outcome:   # todo: this actually belongs to the Game class...
+        raise NotImplementedError
+
+    def activePlayerCanClaimDraw(self):
+        raise NotImplementedError
+
+    def kingTaken(self):
+        raise NotImplementedError
+
+    def whiteKingTaken(self):
+        raise NotImplementedError
+
+    def blackKingTaken(self):
+        raise NotImplementedError
+
+    def isLegalMove(self, move: Any, representation: IMoveRepresentation):
+        raise NotImplementedError
+
+    def isPseudoLegalMove(self, move: Any, representation: IMoveRepresentation):
+        raise NotImplementedError
+
+    def clear(self):
+        raise NotImplementedError
+
+

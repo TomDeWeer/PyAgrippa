@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generator, Optional, Tuple
 
+import chess
+
 from PyAgrippa.Squares.SquareRepresentation import ISquareRepresentation, Square0x88Representation
+from PyAgrippa.Tools.caching import cachedMethod
 
 if TYPE_CHECKING:
     from PyAgrippa.Boards.Board import IBoard, BoardSCPS
@@ -17,6 +20,9 @@ class ISquare:
     def __init__(self, board: IBoard, representation: ISquareRepresentation = Square0x88Representation):
         self.representation = representation
         self.board = board
+
+    def toPythonChess(self):
+        return chess.square(file_index=self.getFile(), rank_index=self.getRank())
 
     def __str__(self):
         return f"{'abcdefgh'[self.getFile()]}{self.getRank()+1}"
@@ -51,10 +57,12 @@ class ISquare:
     # Destination square generators. "Off board" checking occurs here but it is not checked if a piece already occupies
     # the destination square. The destination squares object are not returned. Instead, their internal identifier is
     # returned (e.g. (0,0) instead of the ISquare object of a1).
+    # @cachedMethod
     def getKnightDestinationSquares(self) -> Generator[ISquare]:
         for identifier in self.representation.getKnightDestinationSquares():
             yield self.getBoard().getSquareViaIdentifier(identifier)
 
+    # @cachedMethod
     def getKingDestinationSquares(self):
         for identifier in self.representation.getKingDestinationSquares():
             yield self.getBoard().getSquareViaIdentifier(identifier)
@@ -67,6 +75,11 @@ class ISquare:
         for ray in raySquareIdentifiers:
             yield rayGen(ray)
 
+    def getIntermediateRaySquareGenerator(self, identifierGenerator) -> Generator[ISquare]:
+        for identifier in identifierGenerator:
+            yield self.getBoard().getSquareViaIdentifier(identifier)
+
+    # @cachedMethod
     def getRookDestinationSquares(self) -> Generator[Generator[ISquare]]:
         """
         Returns a generator containing an entry for every ray. An entry is a generator that follows the ray until it hits
@@ -74,11 +87,21 @@ class ISquare:
         """
         return self.getRaySquareGenerators(self.representation.getRookDestinationSquares())
 
+    # @cachedMethod
     def getQueenDestinationSquares(self) -> Generator[Generator[ISquare]]:
         return self.getRaySquareGenerators(self.representation.getQueenDestinationSquares())
 
     def getBishopDestinationSquares(self) -> Generator[Generator[ISquare]]:
         return self.getRaySquareGenerators(self.representation.getBishopDestinationSquares())
+
+    def getIntermediateRooksSquaresBetween(self, end: ISquare) -> Generator[ISquare, None, None]:
+        return self.getIntermediateRaySquareGenerator(identifierGenerator=self.representation.getIntermediateRookSquareGenerator(end.representation))
+
+    def getIntermediateBishopSquaresBetween(self, end: ISquare) -> Generator[ISquare, None, None]:
+        return self.getIntermediateRaySquareGenerator(identifierGenerator=self.representation.getIntermediateBishopSquareGenerator(end.representation))
+
+    def getIntermediateQueenSquaresBetween(self, end: ISquare) -> Generator[ISquare, None, None]:
+        return self.getIntermediateRaySquareGenerator(identifierGenerator=self.representation.getIntermediateQueenSquareGenerator(end.representation))
 
     def getPawnAdvancementSquare(self, isWhite: bool) -> Tuple[ISquare, bool]:
         """
@@ -91,6 +114,7 @@ class ISquare:
         for identifier, isPromotion in self.representation.getPawnCaptureSquares(isWhite):
             yield self.getBoard().getSquareViaIdentifier(identifier), isPromotion
 
+    # @cachedMethod
     def getEnPassantCapturedPawnSquare(self) -> ISquare:
         """
         Assuming self is an en passant square, returns the square the doubly pushed pawn is on.
@@ -98,6 +122,7 @@ class ISquare:
         """
         return self.getBoard().getSquareViaIdentifier(self.representation.getEnPassantCapturedPawnSquare())
 
+    # @cachedMethod
     def getDoublePawnAdvancementDestinationAndEnPassantSquare(self, isWhite: bool) -> Tuple[Optional[ISquare], Optional[ISquare]]:
         identifier, identifierEP = self.representation.getDoublePawnAdvancementDestinationAndEnPassantSquare(isWhite)
         if identifier is None:
@@ -161,6 +186,15 @@ class SquareSCPS(ISquare):
         self.piece = None  # no pieces yet on the board
         ISquare.__init__(self, representation=representation, board=board)
 
+    def __eq__(self, other: ISquare):
+        if isinstance(other, ISquare):
+            return self.getRank() == other.getRank() and self.getFile() == other.getFile()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.representation)
+
     def empty(self):
         self.piece = None
 
@@ -170,3 +204,15 @@ class SquareSCPS(ISquare):
 
     def getPiece(self) -> Optional[PieceSCPS]:
         return self.piece
+
+
+SQUARES_TUPLES = [
+    A1, B1, C1, D1, E1, F1, G1, H1,
+    A2, B2, C2, D2, E2, F2, G2, H2,
+    A3, B3, C3, D3, E3, F3, G3, H3,
+    A4, B4, C4, D4, E4, F4, G4, H4,
+    A5, B5, C5, D5, E5, F5, G5, H5,
+    A6, B6, C6, D6, E6, F6, G6, H6,
+    A7, B7, C7, D7, E7, F7, G7, H7,
+    A8, B8, C8, D8, E8, F8, G8, H8,
+] = [(i, j) for j in range(8) for i in range(8)]

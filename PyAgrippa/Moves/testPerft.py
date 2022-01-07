@@ -2,7 +2,8 @@ import time
 import unittest
 
 from PyAgrippa.Boards.SCPSBoard import BoardSCPS
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AllMoveGenerator import AllMoveGenerator
 from PyAgrippa.Moves.OOPMoveRepresentation.OOPMoveRepresentation import OOPMoveRepresentation
 from PyAgrippa.Moves.Perft import Perft
 from PyAgrippa.Squares.SquareRepresentor import Square0X88Representor
@@ -15,7 +16,7 @@ class PerftTest(unittest.TestCase):
     def testInitialSetup(self):
         board = boardClass(squareRepresentor)
         board.setInitialSetup()
-        perft = Perft(board=board, moveGenerator=MoveGenerator(OOPMoveRepresentation()))
+        perft = Perft(board=board, moveGenerator=AllMoveGenerator(OOPMoveRepresentation()))
         depths = [0, 1, 2, 3, 4, 5, 6]
         correctPerfts = [1, 20, 400, 8902, 197742, 4897256, 120921506]  # from http://www.open-aurec.com/wbforum/viewtopic.php?f=4&t=51764, for pseudo legal (quite hard actually)
         for depth, correctPerft in zip(depths, correctPerfts):

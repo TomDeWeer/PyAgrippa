@@ -18,6 +18,24 @@ class DoublePawnAdvancement(IMove):
         self.movingPiece = movingPiece
         self.enPassantSquare = enPassantSquare
 
+    def isDoublePawnAdvancement(self):
+        return True
+
+    def getStartingSquare(self):
+        return self.start
+
+    def getEndingSquare(self):
+        return self.end
+
+    def __str__(self):
+        return f"{self.movingPiece} from {self.start} to {self.end}"
+
+    def __eq__(self, other: IMove):
+        if isinstance(other, DoublePawnAdvancement):
+            return self.movingPiece == other.movingPiece
+        else:
+            return False
+
     def getMovingPiece(self):
         return self.movingPiece
 
@@ -29,6 +47,8 @@ class DoublePawnAdvancement(IMove):
         self.getBoard().setEnPassantSquare(self.enPassantSquare)
         #  todo: only set ep square if there are possible ep captures, i.e. if there are enemy pawns next to the
         #   destination square. This increases hashing performance & might increase pawn move generation speed.
+        # 3. half move clock
+        self.getBoard().resetHalfMoveClock()
 
     def undo(self):
         # atomic actions
@@ -36,6 +56,8 @@ class DoublePawnAdvancement(IMove):
         self.getBoard().revertToPreviousEnPassantSquare()
         # 2. put the piece back
         self.getBoard().movePieceSPC(piece=self.movingPiece, start=self.end, end=self.start)
+        # 3. half move clock
+        self.getBoard().revertToPreviousHalfMoveClock()
 
     def applyCastlingRightChanges(self):
         return  # double pawn advancement will never change castling rights

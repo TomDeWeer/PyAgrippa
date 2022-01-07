@@ -1,4 +1,6 @@
-from typing import Any, Tuple, Optional, Generator
+from typing import Any, Tuple, Optional, Generator, List
+
+from PyAgrippa.Tools.caching import cachedMethod
 
 
 class ISquareRepresentation:
@@ -11,6 +13,9 @@ class ISquareRepresentation:
         Returns the internal representation (most of the time an integer, sometimes a tuple of 2 integers).
         """
         raise NotImplementedError
+
+    def __hash__(self):
+        return hash(self.getState())
 
     def getRank(self):
         """
@@ -27,10 +32,10 @@ class ISquareRepresentation:
     def onBoard(self) -> bool:
         raise NotImplementedError
 
-    def getKnightDestinationSquares(self) -> Generator[Any, None, None]:
+    def getKnightDestinationSquares(self) -> List[Any]:
         raise NotImplementedError
 
-    def getKingDestinationSquares(self) -> Generator[Any, None, None]:
+    def getKingDestinationSquares(self) -> List[Any]:
         raise NotImplementedError
 
     def getRookDestinationSquares(self) -> Generator[Generator[Any, None, None], None, None]:
@@ -45,7 +50,7 @@ class ISquareRepresentation:
     def getPawnAdvancementSquare(self, isWhite: bool) -> Tuple[Any, bool]:
         raise NotImplementedError
 
-    def getPawnCaptureSquares(self, isWhite: bool) -> Generator[Tuple[Any, bool], None, None]:
+    def getPawnCaptureSquares(self, isWhite: bool) -> List[Tuple[Any, bool]]:
         raise NotImplementedError
 
     def getEnPassantCapturedPawnSquare(self):
@@ -61,6 +66,15 @@ class ISquareRepresentation:
         raise NotImplementedError
 
     def getKingAndRookCastlingSquares(self, kingside: bool, white: bool) -> Tuple[Any, Any]:
+        raise NotImplementedError
+
+    def getIntermediateRookSquareGenerator(self, representation) -> Generator[Any, None, None]:
+        raise NotImplementedError
+
+    def getIntermediateBishopSquareGenerator(self, representation) -> Generator[Any, None, None]:
+        raise NotImplementedError
+
+    def getIntermediateQueenSquareGenerator(self, representation) -> Generator[Any, None, None]:
         raise NotImplementedError
 
 
@@ -90,19 +104,23 @@ class Square0x88Representation(ISquareRepresentation):
     def onBoard(self) -> bool:
         return self._onBoard(self.index)
 
-    def getKnightDestinationSquares(self) -> Generator:
+    def getKnightDestinationSquares(self) -> List[int]:
         start = self.index
+        ids = []
         for offset in self.knightOffsets:
             destinationIdentifier = start + offset
             if self._onBoard(destinationIdentifier):
-                yield destinationIdentifier
+                ids.append(destinationIdentifier)
+        return ids
 
-    def getKingDestinationSquares(self) -> Generator:
+    def getKingDestinationSquares(self) -> List[int]:
         start = self.index
+        ids = []
         for offset in self.kingOffsets:
             destinationIdentifier = start + offset
             if self._onBoard(destinationIdentifier):
-                yield destinationIdentifier
+                ids.append(destinationIdentifier)
+        return ids
 
     def rayGen(self, ray: int):
         start = self.index
@@ -113,6 +131,26 @@ class Square0x88Representation(ISquareRepresentation):
                 yield nextIndex
             else:
                 break
+            i += 1
+
+    def inbetweenRayGen(self, possibleRays: Tuple[int, ...], end: int):
+        start = self.index
+        ray = None
+        maxi = None
+        for possibleRay in possibleRays:
+            if (end - start) % possibleRay == 0:
+                maxi = (end - start) // possibleRay
+                if 0 < maxi < 8:
+                    ray = possibleRay
+                    break
+        if ray is None:
+            raise ValueError("No ray found.")
+
+        i = 1
+        while i < maxi:
+            nextIndex = start+i*ray
+            assert self._onBoard(nextIndex)
+            yield nextIndex
             i += 1
 
     def getDestinationSquares(self, rays: Tuple[int, ...]) -> Generator[Generator[Any, None, None], None, None]:
@@ -128,6 +166,16 @@ class Square0x88Representation(ISquareRepresentation):
     def getQueenDestinationSquares(self) -> Generator[Generator[Any, None, None], None, None]:
         return self.getDestinationSquares(self.queenRays)
 
+    def getIntermediateRookSquareGenerator(self, representation: 'Square0x88Representation') -> Generator[Any, None, None]:
+        return self.inbetweenRayGen(possibleRays=self.rookRays, end=representation.index)
+
+    def getIntermediateBishopSquareGenerator(self, representation: 'Square0x88Representation') -> Generator[Any, None, None]:
+        return self.inbetweenRayGen(possibleRays=self.bishopRays, end=representation.index)
+
+    def getIntermediateQueenSquareGenerator(self, representation: 'Square0x88Representation') -> Generator[Any, None, None]:
+        return self.inbetweenRayGen(possibleRays=self.queenRays, end=representation.index)
+
+    @cachedMethod
     def getPawnAdvancementSquare(self, isWhite: bool) -> Tuple[int, bool]:
         index = self.index
         rank = self.getRank()
@@ -136,7 +184,8 @@ class Square0x88Representation(ISquareRepresentation):
         else:
             return index - 16, rank == 1
 
-    def getPawnCaptureSquares(self, isWhite: bool) -> Generator[Tuple[Any, bool], Any, Any]:
+    # @cachedMethod   todo: cannot be cached because its a generator
+    def getPawnCaptureSquares(self, isWhite: bool) -> List[Tuple[Any, bool]]:
         index = self.index
         if isWhite:
             leftOffset = 15
@@ -153,6 +202,7 @@ class Square0x88Representation(ISquareRepresentation):
         if self._onBoard(right):
             yield right, isPromotion
 
+    @cachedMethod
     def getEnPassantCapturedPawnSquare(self):
         if self.getRank() == 2:
             return self.index + 16
@@ -161,6 +211,7 @@ class Square0x88Representation(ISquareRepresentation):
         else:
             raise ValueError()
 
+    @cachedMethod
     def getDoublePawnAdvancementDestinationAndEnPassantSquare(self, isWhite: bool) -> Tuple[Optional[int], Optional[int]]:
         rank = self.getRank()
         if isWhite and rank == 1:
@@ -170,18 +221,21 @@ class Square0x88Representation(ISquareRepresentation):
         else:
             return None, None
 
+    @cachedMethod
     def isQueensideRookSquare(self, isWhite: bool) -> bool:
         if isWhite:
             return self.index == 0
         else:
             return self.index == 112
 
+    @cachedMethod
     def isKingsideRookSquare(self, isWhite: bool) -> bool:
         if isWhite:
             return self.index == 7
         else:
             return self.index == 119
 
+    @cachedMethod
     def getKingAndRookCastlingSquares(self, kingside: bool, white: bool) -> Tuple[int, int]:
         if white:
             if kingside:
@@ -235,15 +289,21 @@ class RankFileRepresentation(ISquareRepresentation):
     def onBoard(self) -> bool:
         return self._onBoard(self.getState())
 
-    def getKnightDestinationSquares(self) -> Generator[Any, None, None]:
+    @cachedMethod
+    def getKnightDestinationSquares(self) -> List[Tuple[int, int]]:
         startFile, startRank = self.getState()
+        squares = []
         for offsetFile, offsetRank in self.knightOffsets:
-            yield offsetFile + startFile, offsetRank + startRank
+            squares.append((offsetFile + startFile, offsetRank + startRank))
+        return squares
 
-    def getKingDestinationSquares(self) -> Generator[Any, None, None]:
+    @cachedMethod
+    def getKingDestinationSquares(self) -> List[Tuple[int, int]]:
         startFile, startRank = self.getState()
+        squares = []
         for offsetFile, offsetRank in self.kingOffsets:
-            yield offsetFile + startFile, offsetRank + startRank
+            squares.append((offsetFile + startFile, offsetRank + startRank))
+        return squares
 
     def rayGen(self, ray: int):
         startFile, startRank = self.getState()

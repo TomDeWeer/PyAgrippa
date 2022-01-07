@@ -1,5 +1,5 @@
 from PyAgrippa.Boards.Board import IBoard
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
 
 
 class Perft:
@@ -7,7 +7,7 @@ class Perft:
     Tests a move generator with perft.
     """
 
-    def __init__(self, board: IBoard, moveGenerator: MoveGenerator):
+    def __init__(self, board: IBoard, moveGenerator: AbstractMoveGenerator):
         self.board = board
         self.moveGenerator = moveGenerator
 

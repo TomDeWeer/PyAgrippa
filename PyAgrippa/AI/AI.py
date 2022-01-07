@@ -1,10 +1,13 @@
+from typing import Any
+
 from PyAgrippa.Boards.Board import IBoard
 from PyAgrippa.Evaluation.BoardEvaluator import BoardEvaluator
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 
 
 class IChessMachineResult:
-    def getBestMove(self):
+    def getBestMove(self) -> Any:
         raise NotImplementedError
 
     def getEvaluation(self):
@@ -15,15 +18,21 @@ class IChessMachineResult:
 
 
 class ChessMachine:
-    def __init__(self, moveGenerator: MoveGenerator, boardEvaluator: BoardEvaluator):
-        self.moveGenerator = moveGenerator
-        self.boardEvaluator = boardEvaluator
+    def __init__(self, moveRepresentation: IMoveRepresentation):
+        self.moveRepresentation = moveRepresentation
+        self.name = None
 
-    def getBoardEvaluator(self):
-        return self.boardEvaluator
+    def setName(self, name: str):
+        self.name = name
 
-    def getMoveGenerator(self):
-        return self.moveGenerator
+    def __str__(self):
+        if self.name is None:
+            return repr(self)
+        else:
+            return self.name
+
+    def getMoveRepresentation(self):
+        return self.moveRepresentation
 
     def getOrderingScheme(self, depth):
         pass

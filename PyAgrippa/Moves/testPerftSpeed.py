@@ -1,7 +1,8 @@
 import time
 
 from PyAgrippa.Boards.SCPSBoard import BoardSCPS
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AllMoveGenerator import AllMoveGenerator
 from PyAgrippa.Moves.OOPMoveRepresentation.OOPMoveRepresentation import OOPMoveRepresentation
 from PyAgrippa.Moves.Perft import Perft
 from PyAgrippa.Squares.SquareRepresentor import Square0X88Representor
@@ -11,7 +12,7 @@ boardClass = BoardSCPS
 
 board = boardClass(squareRepresentor)
 board.setInitialSetup()
-perft = Perft(board=board, moveGenerator=MoveGenerator(OOPMoveRepresentation()))
+perft = Perft(board=board, moveGenerator=AllMoveGenerator(OOPMoveRepresentation()))
 depths = [1, 2, 3, 4, 5]
 for depth in depths:
     start = time.time()

@@ -17,5 +17,8 @@ class BishopSCPS(SlidingPieceSCPS, IBishop):
     def applyCastlingRightChangesDueToMove(self):
         return
 
+    def castlingRightsChangeDueToMove(self):
+        return False
+
     def applyCastlingRightChangesDueToCapture(self):
         return

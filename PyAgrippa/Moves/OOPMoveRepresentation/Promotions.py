@@ -26,6 +26,27 @@ class Promotion(IMove):
         self.capturedPiece = capturedPiece
         self.previousCastlingRights = None
 
+    def toUCI(self) -> str:
+        raise NotImplementedError
+
+    def isPromotionAdvance(self):
+        return self.capturedPiece is None
+
+    def getPromotionSquare(self):
+        return self.promotionSquare
+
+    def isPromotionCapture(self):
+        return self.capturedPiece is not None
+
+    def getStartingSquare(self):
+        return self.start
+
+    def getEndingSquare(self):
+        return self.promotionSquare
+
+    def __str__(self):
+        return f"{self.pawn} from {self.start} to {self.promotionSquare}, promoting to {self.getPromotedPiece()}."
+
     def getMovingPiece(self):
         return self.pawn
 
@@ -43,6 +64,8 @@ class Promotion(IMove):
         self.placePromotedPiece()
         # 4. en passant
         self.getBoard().setEnPassantSquare(None)
+        # 5. half move clock
+        self.getBoard().resetHalfMoveClock()
 
     def placePromotedPiece(self):
         self.getBoard().putPiece(piece=self.getPromotedPiece(), square=self.promotionSquare)
@@ -64,8 +87,11 @@ class Promotion(IMove):
         # 4. place the captured piece
         if self.capturedPiece is not None:
             self.getBoard().putPiece(piece=self.capturedPiece, square=self.promotionSquare)
+        # 5. half move clock
+        self.getBoard().revertToPreviousHalfMoveClock()
 
     def applyCastlingRightChanges(self):
+        assert self.previousCastlingRights is None
         self.previousCastlingRights = self.getBoard().getAllCastlingRights()
         if self.capturedPiece is not None:
             self.getBoard().applyCastlingRightChangesDueToCaptureOfPieceAtSquare(piece=self.capturedPiece,
@@ -73,6 +99,7 @@ class Promotion(IMove):
 
     def undoCastlingRightChanges(self):
         self.getBoard().setAllCastlingRights(self.previousCastlingRights)
+        self.previousCastlingRights = None
 
 
 class PromotionToKnight(Promotion):
@@ -89,8 +116,18 @@ class PromotionToKnight(Promotion):
                            capturedPiece=capturedPiece)
         self.promotedPiece = pawn.getPromotedKnight()
 
+    def toUCI(self) -> str:
+        return f"{self.getStartingSquare()}{self.getEndingSquare()}k"  # todo: not sure here?
+
     def getPromotedPiece(self) -> IPiece:
         return self.promotedPiece
+
+    def __eq__(self, other: IMove):
+        if isinstance(other, PromotionToKnight):
+            return (self.start == other.start) and (self.promotionSquare == other.promotionSquare) and \
+                   (self.pawn == other.pawn) and (self.capturedPiece == other.capturedPiece) and self.previousCastlingRights == other.previousCastlingRights
+        else:
+            return False
 
 
 class PromotionToQueen(Promotion):
@@ -107,5 +144,17 @@ class PromotionToQueen(Promotion):
                            capturedPiece=capturedPiece)
         self.promotedPiece = pawn.getPromotedQueen()
 
+    def toUCI(self) -> str:
+        return f"{self.getStartingSquare()}{self.getEndingSquare()}q"
+
     def getPromotedPiece(self) -> IPiece:
         return self.promotedPiece
+
+    def __eq__(self, other: IMove):
+        if isinstance(other, PromotionToQueen):
+            return (self.start == other.start) and (self.promotionSquare == other.promotionSquare) and \
+                   (self.pawn == other.pawn) and (self.capturedPiece == other.capturedPiece) and self.previousCastlingRights == other.previousCastlingRights
+        else:
+            return False
+
+

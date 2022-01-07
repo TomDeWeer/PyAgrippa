@@ -3,7 +3,8 @@ import time
 from PyAgrippa.AI.Negamax import Negamax
 from PyAgrippa.Boards.SCPSBoard import BoardSCPS
 from PyAgrippa.Evaluation.BoardEvaluatorViaPieces import BoardEvaluatorViaPieces
-from PyAgrippa.Moves.MoveGenerator import MoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AbstractMoveGenerator import AbstractMoveGenerator
+from PyAgrippa.Moves.MoveGeneration.AllMoveGenerator import AllMoveGenerator
 from PyAgrippa.Moves.OOPMoveRepresentation.OOPMoveRepresentation import OOPMoveRepresentation
 
 if __name__ == '__main__':
@@ -11,7 +12,7 @@ if __name__ == '__main__':
     board = BoardSCPS()
     board.setInitialSetup()
     depth = 4
-    AI = Negamax(depth=depth, moveGenerator=MoveGenerator(moveRepresentation=OOPMoveRepresentation()),
+    AI = Negamax(depth=depth, moveGenerator=AllMoveGenerator(moveRepresentation=OOPMoveRepresentation()),
                  boardEvaluator=BoardEvaluatorViaPieces())
     tic = time.time()
     print(AI.computeBestMove(board))

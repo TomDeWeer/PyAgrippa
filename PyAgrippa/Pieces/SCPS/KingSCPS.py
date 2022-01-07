@@ -10,6 +10,10 @@ class KingSCPS(PieceSCPS, IKing):
     def applyCastlingRightChangesDueToMove(self):
         self.getBoard().setCastlingRightsOf(white=self.isWhite(), kingsideValue=False, queensideValue=False)
 
+    def castlingRightsChangeDueToMove(self):
+        return self.getBoard().getCastlingRights(white=self.isWhite(), king=True) or \
+               self.getBoard().getCastlingRights(white=self.isWhite(), king=False)
+
     def applyCastlingRightChangesDueToCapture(self):
         self.getBoard().setCastlingRightsOf(white=self.isWhite(), kingsideValue=False, queensideValue=False)
 

@@ -62,8 +62,27 @@ class BoardEvaluator:
         """
         raise NotImplementedError
 
-    def applyMove(self, move: IMove):
+    def evaluateMove(self, move: IMove):
         raise NotImplementedError
 
     def undoLast(self):
         raise NotImplementedError
+
+    def evaluateRookAt(self, rook: IRook, square):
+        raise NotImplementedError
+
+    def evaluateQueenAt(self, queen: IQueen, square):
+        raise NotImplementedError
+
+    def evaluateBishopAt(self, bishop: IBishop, square):
+        raise NotImplementedError
+
+    def evaluatePawnAt(self, pawn: IPawn, square):
+        raise NotImplementedError
+
+    def evaluateKnightAt(self, knight: IKnight, square):
+        raise NotImplementedError
+
+    def evaluateKingAt(self, king: IKing, square):
+        raise NotImplementedError
+

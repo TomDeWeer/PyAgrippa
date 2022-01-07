@@ -17,5 +17,8 @@ class QueenSCPS(SlidingPieceSCPS, IQueen):
     def applyCastlingRightChangesDueToMove(self):
         return
 
+    def castlingRightsChangeDueToMove(self):
+        return False
+
     def applyCastlingRightChangesDueToCapture(self):
         return

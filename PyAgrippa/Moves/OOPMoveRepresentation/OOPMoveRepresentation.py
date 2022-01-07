@@ -5,7 +5,9 @@ from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation, T
 from PyAgrippa.Moves.OOPMoveRepresentation.Castling import Castling
 from PyAgrippa.Moves.OOPMoveRepresentation.DoublePawnAdvancement import DoublePawnAdvancement
 from PyAgrippa.Moves.OOPMoveRepresentation.EnPassant import EnPassant
-from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove, NormalMove, CapturingMove
+from PyAgrippa.Moves.OOPMoveRepresentation.Move import IMove
+from PyAgrippa.Moves.OOPMoveRepresentation.NormalMove import NormalMove
+from PyAgrippa.Moves.OOPMoveRepresentation.Capture import CapturingMove
 from PyAgrippa.Moves.OOPMoveRepresentation.Promotions import Promotion, PromotionToQueen, PromotionToKnight
 from PyAgrippa.Pieces.King import IKing
 from PyAgrippa.Pieces.Pawn import IPawn
@@ -20,6 +22,9 @@ class OOPMoveRepresentation(IMoveRepresentation):
 
     def isSquareCentered(self) -> bool:
         return True
+
+    def toUCI(self, move: IMove) -> str:
+        return move.toUCI()
 
     def generateMove(self,
                      board: IBoard,
@@ -89,13 +94,43 @@ class OOPMoveRepresentation(IMoveRepresentation):
         )
 
     def isEnPassant(self, move: IMove):
-        raise NotImplementedError
+        return move.isEnPassant()
+
+    def isCastling(self, move: IMove):
+        return move.isCastling()
+
+    def isKingsideCastling(self, move: IMove):
+        return move.isKingsideCastling()
+
+    def isQueensideCastling(self, move: IMove):
+        return move.isQueensideCastling()
+
+    def isPureCaptureMove(self, move: IMove):
+        return move.isPureCapturingMove()
+
+    def isNormalMove(self, move: IMove):
+        return move.isNormalMove()
+
+    def isDoublePawnAdvancement(self, move: IMove):
+        return move.isDoublePawnAdvancement()
+
+    def isPromotionCapture(self, move: IMove):
+        return move.isPromotionCapture()
+
+    def isPromotionAdvance(self, move: IMove):
+        return move.isPromotionAdvance()
+
+    def whiteMove(self, move: IMove):
+        return move.isWhiteMove()
 
     def getStartingSquare(self, move: IMove) -> ISquare:
-        raise NotImplementedError
+        return move.getStartingSquare()
 
     def getEndingSquare(self, move: IMove) -> IMove:
-        raise NotImplementedError
+        return move.getEndingSquare()
+
+    def getPromotionSquare(self, move: IMove) -> ISquare:
+        return move.getPromotionSquare()
 
     def getStartingSquareIdentifier(self, move: IMove):
         raise NotImplementedError
@@ -121,3 +156,6 @@ class OOPMoveRepresentation(IMoveRepresentation):
         move.getBoard().switchSideToMove()
         move.undoCastlingRightChanges()
         move.undo()
+
+    def toStr(self, move: IMove):
+        return str(move)

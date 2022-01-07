@@ -32,6 +32,9 @@ class IMoveRepresentation(Generic[T]):
     #     """
     #     raise NotImplementedError
 
+    def toUCI(self, move: T) -> str:
+        raise NotImplementedError
+
     def generateMove(self, board: IBoard,
                      piece: IPiece = None,
                      start: ISquare = None,
@@ -89,10 +92,43 @@ class IMoveRepresentation(Generic[T]):
     def isEnPassant(self, move: T):
         raise NotImplementedError
 
+    def isCastling(self, move: T):
+        raise NotImplementedError
+
+    def isKingsideCastling(self, move):
+        raise NotImplementedError
+
+    def isQueensideCastling(self, move):
+        raise NotImplementedError
+
+    def isPureCaptureMove(self, move: T):
+        raise NotImplementedError
+
+    def isNormalMove(self, move: T):
+        raise NotImplementedError
+
+    def isDoublePawnAdvancement(self, move: T):
+        raise NotImplementedError
+
+    def isPromotionCapture(self, move: T):
+        raise NotImplementedError
+
+    def isPromotionAdvance(self, move: T):
+        raise NotImplementedError
+
+    def whiteMove(self, move: T):
+        raise NotImplementedError
+
+    def blackMove(self, move: T):
+        return not self.whiteMove(move=move)
+
     def getStartingSquare(self, move: T) -> ISquare:
         raise NotImplementedError
 
-    def getEndingSquare(self, move: T) -> T:
+    def getEndingSquare(self, move: T) -> ISquare:
+        raise NotImplementedError
+
+    def getPromotionSquare(self, move: T) -> ISquare:
         raise NotImplementedError
 
     def getStartingSquareIdentifier(self, move: T):
@@ -115,3 +151,10 @@ class IMoveRepresentation(Generic[T]):
 
     def undoMove(self, move: T): # todo: shouldnt the board also be applied in general?
         raise NotImplementedError
+
+    def toStr(self, move: T):
+        raise NotImplementedError
+
+
+
+

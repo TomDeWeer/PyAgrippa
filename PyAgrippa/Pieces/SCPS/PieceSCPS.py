@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING
+
+from PyAgrippa.Moves.MoveRepresentation import IMoveRepresentation
 from PyAgrippa.Pieces.Piece import IPiece
 
 if TYPE_CHECKING:
@@ -49,11 +51,15 @@ class PieceSCPS(IPiece):
         """
         raise NotImplementedError
 
+    def castlingRightsChangeDueToMove(self):
+        raise NotImplementedError
+
     def applyCastlingRightChangesDueToCapture(self):
         """
         Apply changes to the castling rights when this piece gets captured.
         :return:
         """
         raise NotImplementedError
+
 
 

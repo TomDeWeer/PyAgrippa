@@ -1,0 +1,2 @@
+class MoveComputationError(Exception):
+    pass

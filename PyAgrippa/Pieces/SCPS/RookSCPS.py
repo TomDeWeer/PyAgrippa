@@ -27,6 +27,13 @@ class RookSCPS(SlidingPieceSCPS, IRook):
         if square.isQueensideRookSquare(self.isWhite()):
             self.getBoard().setCastlingRights(white=self.isWhite(), king=False, value=False)
 
+    def castlingRightsChangeDueToMove(self):
+        square = self.getSquare()
+        if square.isKingsideRookSquare(self.isWhite()):
+            return self.getBoard().getCastlingRights(white=self.isWhite(), king=True)
+        if square.isQueensideRookSquare(self.isWhite()):
+            return self.getBoard().getCastlingRights(white=self.isWhite(), king=False)
+
     def applyCastlingRightChangesDueToCapture(self):
         # if a rook gets captured that hasn't moved before, one must remove the castling rights
         # if it's on the original kingside rook square you can remove the kingside castling rights because
